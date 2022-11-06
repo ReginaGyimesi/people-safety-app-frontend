@@ -1,20 +1,46 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { useEffect, useState } from "react";
+import { StyleSheet, Text, View, ActivityIndicator } from "react-native";
+import { API_BASE_URL } from "@env";
 
 export default function App() {
+  const [crimes, setCrimes] = useState<any>([]);
+
+  useEffect(() => {
+    const fetchCrimes = async () => {
+      try {
+        const req = await fetch(`${API_BASE_URL}get-all-crimes`);
+        const res = await req.json();
+
+        setCrimes(res);
+      } catch {}
+    };
+    fetchCrimes();
+  }, []);
+
+  if (!crimes) return <ActivityIndicator />;
   return (
     <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
-      <StatusBar style="auto" />
+      <Text style={styles.item}>{crimes[0]?.area_name}</Text>
+      {crimes
+        .filter(
+          (c: any) =>
+            c.crime_or_offence == "all-crimes" && c.ref_period == "2020/2021"
+        )
+        .map((c: any, i: number) => (
+          <Text key={i} style={styles.item}>
+            {c.area_name} - {c.value}
+          </Text>
+        ))}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#fff",
+  },
+  item: {
+    fontSize: 15,
+    marginTop: 5,
   },
 });
