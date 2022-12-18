@@ -1,59 +1,28 @@
-import React, { createRef, useEffect, useState } from "react";
-import MapView from "react-native-maps";
+import React from "react";
 import { StyleSheet, View } from "react-native";
-import * as Location from "expo-location";
+import MapView from "react-native-maps";
 import CurrentLocationButton from "../common/CurrentLocationButton";
+import SearchBar from "../common/SearchBar";
 
-export default function Map() {
-  const [location, setLocation] = useState<any>({
-    latitude: 51.5072,
-    longitude: 0.1276,
-  });
-  const mapRef = createRef<any>();
-
-  const goToMyLocation = async () => {
-    if (location) {
-      mapRef.current.animateToRegion({
-        latitude: location.coords.latitude,
-        longitude: location.coords.longitude,
-      });
-    }
-  };
-
-  useEffect(() => {
-    (async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        console.log("location status denied");
-        return;
-      }
-
-      let location = await Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.Balanced,
-        timeInterval: 5,
-        distanceInterval: 80,
-      });
-      setLocation(location);
-    })();
-  }, []);
-
+export default function Map({ mapRef, location, onPress }: any) {
   return (
     <View style={styles.container}>
+      <SearchBar />
       <MapView
         style={styles.map}
         ref={mapRef}
         minZoomLevel={15}
         maxZoomLevel={15}
         showsMyLocationButton={false}
-        initialRegion={{
-          latitude: location.coords.latitude,
-          longitude: location.coords.longitude,
-          latitudeDelta: 0,
-          longitudeDelta: 0,
+        region={{
+          latitude: location.coords?.latitude ?? 0,
+          longitude: location.coords?.longitude ?? 0,
+          latitudeDelta: 0.0421,
+          longitudeDelta: 0.0421,
         }}
         showsUserLocation
       />
-      <CurrentLocationButton onPress={goToMyLocation} />
+      <CurrentLocationButton onPress={onPress} />
     </View>
   );
 }

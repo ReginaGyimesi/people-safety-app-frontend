@@ -1,5 +1,5 @@
 import React from "react";
-import { Pressable, StyleSheet, TouchableOpacity, View } from "react-native";
+import { StyleSheet, TouchableOpacity } from "react-native";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import { colors } from "../../styles";
 
@@ -24,16 +24,20 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white,
     width: 50,
     height: 50,
-    borderRadius: 10,
-    zIndex: 1,
+    borderRadius: 16,
     right: 15,
-    bottom: 15,
+    bottom: "22%",
     position: "absolute",
     justifyContent: "center",
     alignItems: "center",
   },
   elevation: {
-    elevation: 40,
-    shadowColor: "#52006A",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 5,
+    },
+    shadowOpacity: 0.34,
+    shadowRadius: 6.27,
   },
 });
