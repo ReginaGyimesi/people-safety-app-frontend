@@ -1,7 +1,7 @@
-import React, { useCallback, useMemo, useRef } from "react";
-import { View, Text, StyleSheet } from "react-native";
 import BottomSheet from "@gorhom/bottom-sheet";
-import { colors, sizes, weights } from "../../styles";
+import React, { useCallback, useMemo, useRef } from "react";
+import { StyleSheet, Text, View } from "react-native";
+import { colors, sizes } from "../../styles";
 import Handle from "./CustomHandle";
 
 type Props = {
@@ -29,9 +29,10 @@ export default function CustomBottomSheet({ address }: Props) {
       //onChange={handleSheetChanges}
       style={styles.sheet}
       handleComponent={Handle}
+      //animationConfigs={animationConfigs}
     >
       <View style={styles.container}>
-        <Text style={styles.heading}>Crime rates in</Text>
+        <Text style={styles.heading}>Crime rate in</Text>
         <Text style={styles.text}>{address}</Text>
       </View>
     </BottomSheet>
@@ -47,9 +48,6 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.34,
     shadowRadius: 6.27,
-
-    elevation: 10,
-    zIndex: 10,
   },
   container: {
     flex: 1,

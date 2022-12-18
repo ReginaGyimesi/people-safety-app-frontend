@@ -1,20 +1,68 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { StyleSheet, TextInput, View } from "react-native";
+import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import { colors } from "../../styles";
+import { API_GOOGLE_KEY } from "@env";
 
 export default function SearchBar() {
-  const [search, setSearch] = React.useState("");
+  const [search, setSearch] = React.useState(null);
+  useEffect(() => console.log(search));
+
   return (
     <View style={styles.container}>
       <View style={styles.input}>
-        <TextInput
+        <GooglePlacesAutocomplete
+          placeholder="Search post codes or street names"
+          query={{ key: API_GOOGLE_KEY, components: "country:hu" }}
+          textInputProps={{
+            onChangeText: setSearch,
+          }}
+          styles={{
+            textInputContainer: {
+              borderWidth: 2,
+              borderColor: colors.primary,
+              width: "100%",
+              paddingLeft: 10,
+              paddingRight: 10,
+              backgroundColor: colors.white,
+              borderRadius: 23,
+              alignItems: "center",
+              shadowColor: "#000",
+              flex: 1,
+              shadowOffset: {
+                width: 0,
+                height: 5,
+              },
+              shadowOpacity: 0.34,
+              shadowRadius: 6.27,
+            },
+            textInput: {
+              color: "#5d5d5d",
+              fontSize: 16,
+              height: 40,
+              paddingTop: 8,
+              borderRadius: 23,
+            },
+            predefinedPlacesDescription: {
+              color: "#1faadb",
+            },
+          }}
+        />
+        {/* <TextInput
           onChangeText={setSearch}
           value={search}
-          placeholder="Search post codes or street names"
+          placeholder=""
           placeholderTextColor={colors.primary}
-        />
-        <MaterialIcons name="search" size={20} color={colors.primary} />
+        /> */}
+        {!search && (
+          <MaterialIcons
+            name="search"
+            size={20}
+            color={colors.primary}
+            style={styles.search}
+          />
+        )}
       </View>
     </View>
   );
@@ -30,25 +78,14 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   input: {
-    height: 50,
-    borderWidth: 2,
-    borderColor: colors.primary,
-    width: "100%",
-    paddingLeft: 15,
-    paddingRight: 15,
-    backgroundColor: colors.white,
-    borderRadius: 23,
     flex: 1,
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
-    color: colors.primary,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 5,
-    },
-    shadowOpacity: 0.34,
-    shadowRadius: 6.27,
+    position: "relative",
+  },
+  search: {
+    position: "absolute",
+    right: 15,
+    top: 15,
   },
 });

@@ -1,19 +1,19 @@
 import React, { createRef, useEffect, useState } from "react";
-import { StyleSheet, View } from "react-native";
+import { ActivityIndicator, StyleSheet, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import CustomBottomSheet from "./components/common/BottomSheet";
 import SearchBar from "./components/common/SearchBar";
 import Map from "./components/map/Map";
 import * as Location from "expo-location";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
+import Loading from "./components/common/Loading";
 
 export default function App() {
-  const [location, setLocation] = useState<any>({
-    latitude: 51.5072,
-    longitude: 0.1276,
-  });
+  const [location, setLocation] = useState<any>(null);
   const [currentAddres, setCurrentAddres] = useState("");
   const mapRef = createRef<any>();
+
+  console.log(location);
 
   const goToMyLocation = async () => {
     if (location) {
@@ -51,8 +51,16 @@ export default function App() {
           setCurrentAddres(address);
         }
       }
+      console.log(
+        "location first load " +
+          location.coords.latitude +
+          " address first load " +
+          currentAddres
+      );
     })();
   }, []);
+
+  if (!location) return <Loading />;
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <View style={styles.container}>
@@ -71,5 +79,14 @@ const styles = StyleSheet.create({
   map: {
     width: "100%",
     height: "100%",
+  },
+  activity: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
+    alignItems: "center",
+    justifyContent: "center",
   },
 });

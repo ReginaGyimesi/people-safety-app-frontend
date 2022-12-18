@@ -15,8 +15,8 @@ export default function Map({ mapRef, location, onPress }: any) {
         maxZoomLevel={15}
         showsMyLocationButton={false}
         region={{
-          latitude: location.coords?.latitude ?? 0,
-          longitude: location.coords?.longitude ?? 0,
+          latitude: location.coords?.latitude,
+          longitude: location.coords?.longitude,
           latitudeDelta: 0.0421,
           longitudeDelta: 0.0421,
         }}
