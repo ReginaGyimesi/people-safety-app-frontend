@@ -4,7 +4,6 @@ import MapView, { Marker } from "react-native-maps";
 import CurrentLocationButton from "../common/CurrentLocationButton";
 
 export default function Map({ mapRef, coords, onPress }: any) {
-  console.log(coords);
   return (
     <View style={styles.container}>
       <MapView
