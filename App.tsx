@@ -1,28 +1,69 @@
 import React, { createRef, useEffect, useState } from "react";
-import { ActivityIndicator, StyleSheet, View } from "react-native";
+import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import CustomBottomSheet from "./components/common/BottomSheet";
 import SearchBar from "./components/common/SearchBar";
 import Map from "./components/map/Map";
 import * as Location from "expo-location";
-import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
+import {
+  BottomSheetModalProvider,
+  TouchableOpacity,
+} from "@gorhom/bottom-sheet";
 import Loading from "./components/common/Loading";
+import { API_BASE_URL } from "@env";
+import { GooglePlaceData } from "react-native-google-places-autocomplete";
 
 export default function App() {
   const [location, setLocation] = useState<any>(null);
-  const [currentAddres, setCurrentAddres] = useState("");
+  const [myLocation, setMyLocation] = useState<any>(null);
+  const [address, setAddress] = useState<any>(null);
+  const [myAddress, setMyAddress] = useState<any>(null);
   const mapRef = createRef<any>();
+  const [data, setData] = useState<any>([]);
 
-  console.log(location);
-
-  const goToMyLocation = async () => {
+  const goToLocation = () => {
     if (location) {
       mapRef.current.animateToRegion({
-        latitude: location.coords.latitude,
-        longitude: location.coords.longitude,
+        latitude: location.latitude,
+        longitude: location.longitude,
+      });
+    }
+    if (myLocation) {
+      getMyLocation();
+      mapRef.current.animateToRegion({
+        latitude: myLocation.latitude,
+        longitude: myLocation.longitude,
       });
     }
   };
+
+  const getMyLocation = async () => {
+    setLocation(null);
+    setAddress(null);
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      await fetch(`https://cd16-84-0-25-186.eu.ngrok.io/scot-crime-by-la`, {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          la: "Glasgow City",
+        }),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          setData(data);
+        })
+        .catch((err) => {
+          console.log(err.message);
+        });
+    };
+    fetchData();
+  }, []);
 
   useEffect(() => {
     (async () => {
@@ -34,38 +75,44 @@ export default function App() {
 
       let location = await Location.getCurrentPositionAsync({
         accuracy: Location.Accuracy.Highest,
-        timeInterval: 5,
+        timeInterval: 1,
         distanceInterval: 80,
       });
-      setLocation(location);
-      if (location.coords) {
-        const { latitude, longitude } = location.coords;
-        let response = await Location.reverseGeocodeAsync({
-          latitude,
-          longitude,
-        });
 
-        for (let item of response) {
-          let address = `${item.street}, ${item.postalCode}, ${item.city}`;
+      const { latitude, longitude } = location.coords;
+      let response = await Location.reverseGeocodeAsync({
+        latitude,
+        longitude,
+      });
 
-          setCurrentAddres(address);
-        }
+      for (let item of response) {
+        let address = `${item.street}, ${item.postalCode}, ${item.city}`;
+
+        setMyAddress(address);
       }
-      console.log(
-        "location first load " +
-          location.coords.latitude +
-          " address first load " +
-          currentAddres
-      );
+      setMyLocation(location.coords);
     })();
+
+    if (!location) {
+      getMyLocation();
+    }
   }, []);
 
-  if (!location) return <Loading />;
+  if (!myLocation) return <Loading />;
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <View style={styles.container}>
-        <Map mapRef={mapRef} location={location} onPress={goToMyLocation} />
-        <CustomBottomSheet address={currentAddres} />
+        <SearchBar
+          setCurrentAddress={setAddress}
+          setLocation={setLocation}
+          goToMyLocation={goToLocation}
+        />
+        <Map
+          mapRef={mapRef}
+          coords={location ? location : myLocation}
+          onPress={goToLocation}
+        />
+        <CustomBottomSheet address={address ? address : myAddress} la={data} />
       </View>
     </GestureHandlerRootView>
   );

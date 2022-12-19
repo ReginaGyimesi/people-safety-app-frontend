@@ -1,30 +1,66 @@
-import React, { useEffect } from "react";
-import { StyleSheet, TextInput, View } from "react-native";
-import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
+import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
+import {
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  View,
+  Text,
+} from "react-native";
+import {
+  GooglePlaceData,
+  GooglePlacesAutocomplete,
+} from "react-native-google-places-autocomplete";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import { colors } from "../../styles";
 import { API_GOOGLE_KEY } from "@env";
 
-export default function SearchBar() {
-  const [search, setSearch] = React.useState(null);
-  useEffect(() => console.log(search));
+type Props = {
+  setCurrentAddress: any;
+  setLocation: any;
+  goToMyLocation: any;
+};
 
+export default function SearchBar({
+  setCurrentAddress,
+  setLocation,
+  goToMyLocation,
+}: Props) {
+  const [search, setSearch] = useState<any>([]);
+  const searchLocation = () => {
+    setLocation({
+      latitude: search[0].geometry?.location.lat,
+      longitude: search[0].geometry?.location.lng,
+    });
+    setCurrentAddress(search[0].formatted_address);
+    goToMyLocation;
+  };
+
+  console.log(search);
   return (
     <View style={styles.container}>
       <View style={styles.input}>
         <GooglePlacesAutocomplete
           placeholder="Search post codes or street names"
-          query={{ key: API_GOOGLE_KEY, components: "country:hu" }}
-          textInputProps={{
-            onChangeText: setSearch,
+          onPress={(data, details) => {
+            // 'details' is provided when fetchDetails = true
+            setSearch([details]);
+            searchLocation;
           }}
+          query={{
+            key: API_GOOGLE_KEY,
+            //components: "country:uk",
+            language: "en",
+          }}
+          fetchDetails={true}
+          // currentLocation={true}
+          // currentLocationLabel="Current location"
           styles={{
             textInputContainer: {
               borderWidth: 2,
               borderColor: colors.primary,
               width: "100%",
               paddingLeft: 10,
-              paddingRight: 10,
+              paddingRight: 60,
               backgroundColor: colors.white,
               borderRadius: 23,
               alignItems: "center",
@@ -49,20 +85,15 @@ export default function SearchBar() {
             },
           }}
         />
+        <TouchableOpacity style={styles.search} onPress={searchLocation}>
+          <Text>Search</Text>
+        </TouchableOpacity>
         {/* <TextInput
           onChangeText={setSearch}
           value={search}
           placeholder=""
           placeholderTextColor={colors.primary}
         /> */}
-        {!search && (
-          <MaterialIcons
-            name="search"
-            size={20}
-            color={colors.primary}
-            style={styles.search}
-          />
-        )}
       </View>
     </View>
   );

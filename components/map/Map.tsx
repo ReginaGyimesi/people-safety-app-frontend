@@ -1,13 +1,12 @@
 import React from "react";
 import { StyleSheet, View } from "react-native";
-import MapView from "react-native-maps";
+import MapView, { Marker } from "react-native-maps";
 import CurrentLocationButton from "../common/CurrentLocationButton";
 import SearchBar from "../common/SearchBar";
 
-export default function Map({ mapRef, location, onPress }: any) {
+export default function Map({ mapRef, coords, onPress }: any) {
   return (
     <View style={styles.container}>
-      <SearchBar />
       <MapView
         style={styles.map}
         ref={mapRef}
@@ -15,13 +14,19 @@ export default function Map({ mapRef, location, onPress }: any) {
         maxZoomLevel={15}
         showsMyLocationButton={false}
         region={{
-          latitude: location.coords?.latitude,
-          longitude: location.coords?.longitude,
+          latitude: coords?.latitude,
+          longitude: coords?.longitude,
           latitudeDelta: 0.0421,
           longitudeDelta: 0.0421,
         }}
-        showsUserLocation
-      />
+      >
+        <Marker
+          coordinate={{
+            latitude: coords?.latitude,
+            longitude: coords?.longitude,
+          }}
+        />
+      </MapView>
       <CurrentLocationButton onPress={onPress} />
     </View>
   );
@@ -30,6 +35,7 @@ export default function Map({ mapRef, location, onPress }: any) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    marginBottom: 100,
   },
   map: {
     width: "100%",

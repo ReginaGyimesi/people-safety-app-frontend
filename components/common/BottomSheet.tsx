@@ -6,14 +6,15 @@ import Handle from "./CustomHandle";
 
 type Props = {
   address: string;
+  la: any;
 };
 
-export default function CustomBottomSheet({ address }: Props) {
+export default function CustomBottomSheet({ address, la }: Props) {
   // ref
   const bottomSheetRef = useRef<BottomSheet>(null);
 
   // variables
-  const snapPoints = useMemo(() => ["20%", "86%"], []);
+  const snapPoints = useMemo(() => ["30%", "86%"], []);
 
   // callbacks
   const handleSheetChanges = useCallback((index: number) => {
@@ -34,6 +35,12 @@ export default function CustomBottomSheet({ address }: Props) {
       <View style={styles.container}>
         <Text style={styles.heading}>Crime rate in</Text>
         <Text style={styles.text}>{address}</Text>
+        <Text style={styles.body}>
+          Annual crime rate in your local area is{" "}
+          <Text style={{ fontWeight: "bold" }}>{la[0]?.value} per 10000</Text>{" "}
+          population. This can be rated as {la[0]?.norm_value} out of 10 or
+          average crime level.
+        </Text>
       </View>
     </BottomSheet>
   );
@@ -63,5 +70,11 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     marginTop: 5,
     color: colors.primary,
+  },
+  body: {
+    fontSize: sizes.M16,
+    fontWeight: "500",
+    marginTop: 15,
+    color: "rgba(99, 99, 99, 1)",
   },
 });
