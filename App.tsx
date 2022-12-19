@@ -1,27 +1,21 @@
+import { API_BASE_URL } from "@env";
+import * as Location from "expo-location";
 import React, { createRef, useEffect, useState } from "react";
-import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import CustomBottomSheet from "./components/common/BottomSheet";
+import Loading from "./components/common/Loading";
 import SearchBar from "./components/common/SearchBar";
 import Map from "./components/map/Map";
-import * as Location from "expo-location";
-import {
-  BottomSheetModalProvider,
-  TouchableOpacity,
-} from "@gorhom/bottom-sheet";
-import Loading from "./components/common/Loading";
-import { API_BASE_URL } from "@env";
-import { GooglePlaceData } from "react-native-google-places-autocomplete";
 
 export default function App() {
   const [location, setLocation] = useState<any>(null);
-  const [myLocation, setMyLocation] = useState<any>(null);
   const [address, setAddress] = useState<any>(null);
+  const [myLocation, setMyLocation] = useState<any>(null);
   const [myAddress, setMyAddress] = useState<any>(null);
-  const mapRef = createRef<any>();
+  const [message, setMessage] = useState<any>();
   const [data, setData] = useState<any>([]);
-  const [search, setSearch] = useState<any>([]);
-  const [filtered, setFiltered] = useState<any>(null);
+  const mapRef = createRef<any>();
 
   const goToLocation = () => {
     if (location) {
@@ -41,22 +35,21 @@ export default function App() {
 
   const searchLocation = (details: any) => {
     const filtered = filterLa(details);
+    setMessage(null);
     fetchData(filtered);
     setLocation({
       latitude: details.geometry?.location.lat,
       longitude: details.geometry?.location.lng,
     });
     setAddress(details.formatted_address);
-    setSearch(details);
     goToLocation;
   };
 
   const getMyLocation = async () => {
+    setMessage("Sorry, no data available outside of the UK 😔");
     setLocation(null);
     setAddress(null);
   };
-
-  console.log(`${API_BASE_URL}/scot-crime-by-la`);
 
   const filterLa = (details: any) => {
     var filtered_array = details?.address_components.filter(
@@ -70,7 +63,9 @@ export default function App() {
   };
 
   const fetchData = async (la: any) => {
-    console.log(la);
+    //console.log(la);
+    //console.log(`${API_BASE_URL}/scot-crime-by-la`);
+
     await fetch(`${API_BASE_URL}/scot-crime-by-la`, {
       method: "POST",
       headers: {
@@ -88,7 +83,6 @@ export default function App() {
       .catch((err) => {
         console.log(err.message);
       });
-    console.log(data);
   };
 
   useEffect(() => {
@@ -99,13 +93,13 @@ export default function App() {
         return;
       }
 
-      let location = await Location.getCurrentPositionAsync({
+      let loc = await Location.getCurrentPositionAsync({
         accuracy: Location.Accuracy.Highest,
         timeInterval: 1,
         distanceInterval: 80,
       });
 
-      const { latitude, longitude } = location.coords;
+      const { latitude, longitude } = loc.coords;
       let response = await Location.reverseGeocodeAsync({
         latitude,
         longitude,
@@ -113,10 +107,11 @@ export default function App() {
 
       for (let item of response) {
         let address = `${item.street}, ${item.postalCode}, ${item.city}`;
-
+        if (item.city != "UK" && !location)
+          setMessage("Sorry, no data available outside of the UK 😔");
         setMyAddress(address);
       }
-      setMyLocation(location.coords);
+      setMyLocation(loc.coords);
     })();
 
     if (!location) {
@@ -133,7 +128,11 @@ export default function App() {
           coords={location ? location : myLocation}
           onPress={goToLocation}
         />
-        <CustomBottomSheet address={address ? address : myAddress} la={data} />
+        <CustomBottomSheet
+          address={address ? address : myAddress}
+          la={data}
+          message={message}
+        />
       </View>
     </GestureHandlerRootView>
   );

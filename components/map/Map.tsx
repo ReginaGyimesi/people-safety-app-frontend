@@ -2,7 +2,6 @@ import React from "react";
 import { StyleSheet, View } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import CurrentLocationButton from "../common/CurrentLocationButton";
-import SearchBar from "../common/SearchBar";
 
 export default function Map({ mapRef, coords, onPress }: any) {
   return (

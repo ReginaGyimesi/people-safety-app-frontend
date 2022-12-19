@@ -1,18 +1,8 @@
-import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
-import {
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
-  View,
-  Text,
-} from "react-native";
-import {
-  GooglePlaceData,
-  GooglePlacesAutocomplete,
-} from "react-native-google-places-autocomplete";
-import MaterialIcons from "react-native-vector-icons/MaterialIcons";
-import { colors } from "../../styles";
 import { API_GOOGLE_KEY } from "@env";
+import React from "react";
+import { StyleSheet, View } from "react-native";
+import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
+import { colors } from "../../styles";
 
 type Props = {
   searchLocation: any;
@@ -30,7 +20,7 @@ export default function SearchBar({ searchLocation }: Props) {
           }}
           query={{
             key: API_GOOGLE_KEY,
-            //components: "country:uk",
+            components: "country:uk",
             language: "en",
           }}
           fetchDetails={true}

@@ -7,26 +7,38 @@ import Handle from "./CustomHandle";
 type Props = {
   address: string;
   la: any;
+  message: string;
 };
 
-export default function CustomBottomSheet({ address, la }: Props) {
+export default function CustomBottomSheet({ address, la, message }: Props) {
   // ref
   const bottomSheetRef = useRef<BottomSheet>(null);
 
   // variables
   const snapPoints = useMemo(() => ["30%", "86%"], []);
+  const snapPointsNone = useMemo(() => ["30%"], []);
 
   // callbacks
   const handleSheetChanges = useCallback((index: number) => {
     console.log("handleSheetChanges", index);
   }, []);
 
+  const selectColor = (scoreCat: string) => {
+    if (scoreCat === "high") {
+      return "#BD2031";
+    } else if (scoreCat == "average") {
+      return "rgba(252, 100, 45, 0.8)";
+    } else {
+      return "#228b22";
+    }
+  };
+
   // renders
   return (
     <BottomSheet
       ref={bottomSheetRef}
       index={0}
-      snapPoints={snapPoints}
+      snapPoints={message ? snapPointsNone : snapPoints}
       //onChange={handleSheetChanges}
       style={styles.sheet}
       handleComponent={Handle}
@@ -35,12 +47,33 @@ export default function CustomBottomSheet({ address, la }: Props) {
       <View style={styles.container}>
         <Text style={styles.heading}>Crime rate in</Text>
         <Text style={styles.text}>{address}</Text>
-        <Text style={styles.body}>
-          Annual crime rate in your local area is{" "}
-          <Text style={{ fontWeight: "bold" }}>{la[0]?.value} per 10000</Text>{" "}
-          population. This can be rated as {la[0]?.score} out of 10 or average
-          crime level.
-        </Text>
+        <View style={{ flex: 1, flexDirection: "row", marginTop: 10 }}>
+          {!message && (
+            <View
+              style={[
+                styles.circle,
+                { backgroundColor: selectColor(la[0]?.score_category) },
+              ]}
+            ></View>
+          )}
+          <View>
+            {message ? (
+              <Text style={[styles.body, styles.bold]}>{message}</Text>
+            ) : (
+              <>
+                <Text style={styles.subtitle}>{la[0]?.score_category}</Text>
+                <Text style={styles.body}>
+                  Annual crime rate in your local area is{" "}
+                  <Text style={{ fontWeight: "bold" }}>
+                    {la[0]?.value} per 10000
+                  </Text>{" "}
+                  population. This can be rated as {la[0]?.score} out of 10 or{" "}
+                  {la[0]?.score_category} crime level.
+                </Text>
+              </>
+            )}
+          </View>
+        </View>
       </View>
     </BottomSheet>
   );
@@ -55,11 +88,12 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.34,
     shadowRadius: 6.27,
+    paddingTop: 10,
+    paddingLeft: 20,
   },
   container: {
     flex: 1,
-    paddingTop: 10,
-    padding: 20,
+    paddingRight: 40,
   },
   heading: {
     fontSize: sizes.XL24,
@@ -71,10 +105,25 @@ const styles = StyleSheet.create({
     marginTop: 5,
     color: colors.primary,
   },
+  subtitle: {
+    fontSize: sizes.M16,
+    fontWeight: "500",
+    textTransform: "capitalize",
+  },
   body: {
     fontSize: sizes.S14,
     fontWeight: "500",
-    marginTop: 15,
+    marginTop: 5,
     color: "rgba(99, 99, 99, 1)",
+  },
+  bold: {
+    fontWeight: "700",
+  },
+  circle: {
+    width: 17,
+    height: 17,
+    borderRadius: 17 / 2,
+    backgroundColor: "black",
+    marginRight: 5,
   },
 });
