@@ -34,13 +34,13 @@ export default function App() {
   };
 
   const searchLocation = (details: any) => {
-    const filtered = filterLa(details);
-    setMessage(null);
-    fetchData(filtered);
     setLocation({
       latitude: details.geometry?.location.lat,
       longitude: details.geometry?.location.lng,
     });
+    const filtered = filterLa(details);
+    setMessage(null);
+    fetchData(filtered);
     setAddress(details.formatted_address);
     goToLocation;
   };
