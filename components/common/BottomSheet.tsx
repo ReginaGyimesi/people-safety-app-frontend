@@ -38,8 +38,8 @@ export default function CustomBottomSheet({ address, la }: Props) {
         <Text style={styles.body}>
           Annual crime rate in your local area is{" "}
           <Text style={{ fontWeight: "bold" }}>{la[0]?.value} per 10000</Text>{" "}
-          population. This can be rated as {la[0]?.norm_value} out of 10 or
-          average crime level.
+          population. This can be rated as {la[0]?.score} out of 10 or average
+          crime level.
         </Text>
       </View>
     </BottomSheet>
@@ -72,7 +72,7 @@ const styles = StyleSheet.create({
     color: colors.primary,
   },
   body: {
-    fontSize: sizes.M16,
+    fontSize: sizes.S14,
     fontWeight: "500",
     marginTop: 15,
     color: "rgba(99, 99, 99, 1)",

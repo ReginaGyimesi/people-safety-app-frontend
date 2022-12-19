@@ -15,36 +15,18 @@ import { colors } from "../../styles";
 import { API_GOOGLE_KEY } from "@env";
 
 type Props = {
-  setCurrentAddress: any;
-  setLocation: any;
-  goToMyLocation: any;
+  searchLocation: any;
 };
 
-export default function SearchBar({
-  setCurrentAddress,
-  setLocation,
-  goToMyLocation,
-}: Props) {
-  const [search, setSearch] = useState<any>([]);
-  const searchLocation = () => {
-    setLocation({
-      latitude: search[0].geometry?.location.lat,
-      longitude: search[0].geometry?.location.lng,
-    });
-    setCurrentAddress(search[0].formatted_address);
-    goToMyLocation;
-  };
-
-  console.log(search);
+export default function SearchBar({ searchLocation }: Props) {
   return (
     <View style={styles.container}>
       <View style={styles.input}>
         <GooglePlacesAutocomplete
-          placeholder="Search post codes or street names"
+          placeholder="Search area or post code"
           onPress={(data, details) => {
             // 'details' is provided when fetchDetails = true
-            setSearch([details]);
-            searchLocation;
+            searchLocation(details);
           }}
           query={{
             key: API_GOOGLE_KEY,
@@ -60,7 +42,7 @@ export default function SearchBar({
               borderColor: colors.primary,
               width: "100%",
               paddingLeft: 10,
-              paddingRight: 60,
+              paddingRight: 10,
               backgroundColor: colors.white,
               borderRadius: 23,
               alignItems: "center",
@@ -85,14 +67,20 @@ export default function SearchBar({
             },
           }}
         />
-        <TouchableOpacity style={styles.search} onPress={searchLocation}>
+        {/* <TouchableOpacity style={styles.search} onPress={searchLocation}>
           <Text>Search</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
         {/* <TextInput
           onChangeText={setSearch}
           value={search}
           placeholder=""
           placeholderTextColor={colors.primary}
+        /> */}
+        {/* <MaterialIcons
+          name="search"
+          size={20}
+          color={colors.primary}
+          style={styles.search}
         /> */}
       </View>
     </View>

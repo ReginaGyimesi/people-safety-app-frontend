@@ -20,6 +20,8 @@ export default function App() {
   const [myAddress, setMyAddress] = useState<any>(null);
   const mapRef = createRef<any>();
   const [data, setData] = useState<any>([]);
+  const [search, setSearch] = useState<any>([]);
+  const [filtered, setFiltered] = useState<any>(null);
 
   const goToLocation = () => {
     if (location) {
@@ -37,33 +39,57 @@ export default function App() {
     }
   };
 
+  const searchLocation = (details: any) => {
+    const filtered = filterLa(details);
+    fetchData(filtered);
+    setLocation({
+      latitude: details.geometry?.location.lat,
+      longitude: details.geometry?.location.lng,
+    });
+    setAddress(details.formatted_address);
+    setSearch(details);
+    goToLocation;
+  };
+
   const getMyLocation = async () => {
     setLocation(null);
     setAddress(null);
   };
 
-  useEffect(() => {
-    const fetchData = async () => {
-      await fetch(`https://cd16-84-0-25-186.eu.ngrok.io/scot-crime-by-la`, {
-        method: "POST",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          la: "Glasgow City",
-        }),
+  console.log(`${API_BASE_URL}/scot-crime-by-la`);
+
+  const filterLa = (details: any) => {
+    var filtered_array = details?.address_components.filter(
+      function (address_component: { types: string | string[] }) {
+        return address_component.types.includes("administrative_area_level_2");
+      }
+    );
+    var county = filtered_array?.length ? filtered_array[0].long_name : "";
+
+    return county;
+  };
+
+  const fetchData = async (la: any) => {
+    console.log(la);
+    await fetch(`${API_BASE_URL}/scot-crime-by-la`, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        la: la,
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        setData(data);
       })
-        .then((response) => response.json())
-        .then((data) => {
-          setData(data);
-        })
-        .catch((err) => {
-          console.log(err.message);
-        });
-    };
-    fetchData();
-  }, []);
+      .catch((err) => {
+        console.log(err.message);
+      });
+    console.log(data);
+  };
 
   useEffect(() => {
     (async () => {
@@ -97,16 +123,11 @@ export default function App() {
       getMyLocation();
     }
   }, []);
-
   if (!myLocation) return <Loading />;
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <View style={styles.container}>
-        <SearchBar
-          setCurrentAddress={setAddress}
-          setLocation={setLocation}
-          goToMyLocation={goToLocation}
-        />
+        <SearchBar searchLocation={searchLocation} />
         <Map
           mapRef={mapRef}
           coords={location ? location : myLocation}
