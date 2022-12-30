@@ -6,11 +6,11 @@ import Handle from "./CustomHandle";
 
 type Props = {
   address: string;
-  la: any;
+  data: any;
   message: string;
 };
 
-export default function CustomBottomSheet({ address, la, message }: Props) {
+export default function CustomBottomSheet({ address, data, message }: Props) {
   // ref
   const bottomSheetRef = useRef<BottomSheet>(null);
 
@@ -28,7 +28,7 @@ export default function CustomBottomSheet({ address, la, message }: Props) {
       return "#BD2031";
     } else if (scoreCat == "average") {
       return "rgba(252, 100, 45, 0.8)";
-    } else {
+    } else if (scoreCat == "low") {
       return "#228b22";
     }
   };
@@ -52,7 +52,7 @@ export default function CustomBottomSheet({ address, la, message }: Props) {
             <View
               style={[
                 styles.circle,
-                { backgroundColor: selectColor(la[0]?.score_category) },
+                { backgroundColor: selectColor(data[0]?.score_category) },
               ]}
             ></View>
           )}
@@ -61,14 +61,12 @@ export default function CustomBottomSheet({ address, la, message }: Props) {
               <Text style={[styles.body, styles.bold]}>{message}</Text>
             ) : (
               <>
-                <Text style={styles.subtitle}>{la[0]?.score_category}</Text>
+                <Text style={styles.subtitle}>{data[0]?.score_category}</Text>
                 <Text style={styles.body}>
                   Annual crime rate in your local area is{" "}
-                  <Text style={{ fontWeight: "bold" }}>
-                    {la[0]?.value} per 10000
-                  </Text>{" "}
-                  population. This can be rated as {la[0]?.score} out of 10 or{" "}
-                  {la[0]?.score_category} crime level.
+                  <Text style={{ fontWeight: "bold" }}>{data[0]?.value}</Text>{" "}
+                  per 10 000 population. This can be rated as {data[0]?.score}{" "}
+                  out of 10 or {data[0]?.score_category} crime level.
                 </Text>
               </>
             )}
