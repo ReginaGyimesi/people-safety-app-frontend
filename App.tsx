@@ -17,113 +17,9 @@ const App = memo(() => {
   const [message, setMessage] = useState<any>();
   const [data, setData] = useState<any>([]);
   const [enData, setEnData] = useState<any>([]);
-  const [lsoa, setLsoa] = useState<any>(null);
   const [isScot, setScot] = useState(false);
-
+  const [isLoading, setLoading] = useState(false);
   const mapRef = createRef<any>();
-
-  const lookUpLsoaFromPo = async (details: any) => {
-    const postcodeFromLsoa = filterPostCode(details);
-    const po = postcodeFromLsoa?.short_name;
-    const sanitisedPo = po?.replace(/\s/g, "");
-    await fetch(`${API_BASE_URL}/lsoa-by-po`, {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        po: sanitisedPo,
-      }),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        console.log("fetching lsoa data...");
-        console.log(lsoa);
-        setLsoa(data);
-      })
-      .catch((err) => {
-        console.log(err.message);
-      });
-  };
-
-  const getMyLocation = () => {
-    setMessage("Sorry, no data available outside of England and Scotland 😔");
-    setLocation(null);
-    setAddress(null);
-  };
-
-  const searchLocation = (details: any) => {
-    setLocation({
-      latitude: details.geometry?.location.lat,
-      longitude: details.geometry?.location.lng,
-    });
-    lookUpLsoaFromPo(details);
-    const country = filterCountry(details);
-    const filtered = filterLa(details);
-
-    console.log("country " + country);
-
-    setAddress(details.formatted_address);
-    console.log(lsoa);
-    if (country == "Scotland") {
-      setScot(true);
-      fetchScottishData(filtered);
-      setMessage(null);
-    } else if (country == "England") {
-      setScot(false);
-      fetchEnglishData(lsoa[0]?.lsoa11cd);
-      setMessage(null);
-    } else {
-      setMessage("Sorry, no data available outside of England and Scotland 😔");
-    }
-    goToLocation;
-  };
-
-  const fetchScottishData = async (la: any) => {
-    //console.log(la);
-    //console.log(`${API_BASE_URL}/scot-crime-by-la`);
-
-    await fetch(`${API_BASE_URL}/scot-crime-by-la`, {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        la: la,
-      }),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        console.log("fetching scot data...");
-        setData(data);
-      })
-      .catch((err) => {
-        console.log(err.message);
-      });
-  };
-
-  const fetchEnglishData = async (lsoacd: any) => {
-    await fetch(`${API_BASE_URL}/crime-by-lsoa`, {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        lsoacd: lsoacd,
-      }),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        console.log("fetching en data...");
-        setEnData(data);
-      })
-      .catch((err) => {
-        console.log(err.message);
-      });
-  };
 
   const goToLocation = () => {
     if (location) {
@@ -139,6 +35,94 @@ const App = memo(() => {
         longitude: myLocation.longitude,
       });
     }
+  };
+
+  const getMyLocation = () => {
+    setMessage("Sorry, no data available outside of England and Scotland 😔");
+    setLocation(null);
+    setAddress(null);
+  };
+
+  const searchLocation = (details: any) => {
+    const country = filterCountry(details);
+    const filtered = filterLa(details);
+    const postcodeFromLsoa = filterPostCode(details);
+    const po = postcodeFromLsoa?.short_name;
+    const sanitisedPo = po?.replace(/\s/g, "");
+
+    setLocation({
+      latitude: details.geometry?.location.lat,
+      longitude: details.geometry?.location.lng,
+    });
+
+    console.log("country " + country);
+    setAddress(details.formatted_address);
+
+    if (country == "Scotland") {
+      setScot(true);
+      fetchScottishData(filtered);
+      setMessage(null);
+    } else if (country == "England") {
+      setScot(false);
+      fetchEnglishData(sanitisedPo);
+      setMessage(null);
+    } else {
+      setMessage("Sorry, no data available outside of England and Scotland 😔");
+    }
+    if (!isLoading) {
+      goToLocation;
+    }
+  };
+
+  const fetchScottishData = async (la: any) => {
+    //console.log(la);
+    //console.log(`${API_BASE_URL}/scot-crime-by-la`);
+
+    setLoading(true);
+    await fetch(`${API_BASE_URL}/scot-crime-by-la`, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        la: la,
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("fetching scot data...");
+        setData(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.log(err.message);
+        setLoading(false);
+      });
+  };
+
+  const fetchEnglishData = async (po: any) => {
+    setLoading(true);
+    await fetch(`${API_BASE_URL}/crime-by-po`, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        po: po,
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("fetching en data...");
+        setEnData(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.log(err.message);
+        setLoading(false);
+      });
   };
 
   useEffect(() => {
@@ -190,6 +174,7 @@ const App = memo(() => {
           address={address ? address : myAddress}
           data={!isScot ? enData : data}
           message={message}
+          isLoading={isLoading}
         />
       </View>
     </GestureHandlerRootView>

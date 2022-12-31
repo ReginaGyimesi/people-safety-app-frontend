@@ -13,7 +13,7 @@ export default function SearchBar({ searchLocation }: Props) {
     <View style={styles.container}>
       <View style={styles.input}>
         <GooglePlacesAutocomplete
-          placeholder="Search area or post code"
+          placeholder="Search post code..."
           onPress={(data, details) => {
             // 'details' is provided when fetchDetails = true
             searchLocation(details);
