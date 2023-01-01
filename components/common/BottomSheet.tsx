@@ -3,7 +3,6 @@ import React, { useCallback, useMemo, useRef } from "react";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 import { colors, sizes } from "../../styles";
 import Handle from "./CustomHandle";
-import Loading from "./Loading";
 
 type Props = {
   address: string;
@@ -57,14 +56,21 @@ export default function CustomBottomSheet({
         {isLoading ? (
           <ActivityIndicator style={{ paddingTop: 10 }} />
         ) : (
-          <View style={{ flex: 1, flexDirection: "row", marginTop: 10 }}>
+          <View style={{ marginTop: 20 }}>
             {!message && (
               <View
-                style={[
-                  styles.circle,
-                  { backgroundColor: selectColor(data[0]?.score_category) },
-                ]}
-              ></View>
+                style={{
+                  flex: 1,
+                  flexDirection: "row",
+                }}
+              >
+                <View
+                  style={[
+                    styles.circle,
+                    { backgroundColor: selectColor(data[0]?.score_category) },
+                  ]}
+                ></View>
+              </View>
             )}
 
             <View>
@@ -72,16 +78,51 @@ export default function CustomBottomSheet({
                 <Text style={[styles.body, styles.bold]}>{message}</Text>
               ) : (
                 <>
-                  <Text style={styles.subtitle}>{data[0]?.score_category}</Text>
+                  <Text style={[styles.subtitle, { marginLeft: 22 }]}>
+                    {data[0]?.score_category}
+                  </Text>
                   <Text style={styles.body}>
                     Annual crime rate in your local area is{" "}
-                    <Text style={{ fontWeight: "bold" }}>{data[0]?.value}</Text>{" "}
+                    <Text style={{ fontWeight: "bold" }}>
+                      {data[0]?.total_crime}
+                    </Text>{" "}
                     per 10 000 population. This can be rated as {data[0]?.score}{" "}
                     out of 10 or {data[0]?.score_category} crime level.
                   </Text>
                 </>
               )}
             </View>
+            {!message && (
+              <View>
+                <Text style={[styles.subtitle, { marginTop: 20 }]}>
+                  Most common crime types
+                </Text>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <View>
+                    {data[0]?.crime_type?.map((c: any, i: any) => (
+                      <Text key={i} style={styles.body}>
+                        {c}
+                      </Text>
+                    ))}
+                  </View>
+                  <View>
+                    {data[0]?.n?.map((c: any, i: any) => (
+                      <Text
+                        key={i}
+                        style={[styles.body, { fontWeight: "700" }]}
+                      >
+                        {c}
+                      </Text>
+                    ))}
+                  </View>
+                </View>
+              </View>
+            )}
           </View>
         )}
       </View>
@@ -117,7 +158,7 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: sizes.M16,
-    fontWeight: "500",
+    fontWeight: "700",
     textTransform: "capitalize",
   },
   body: {
@@ -130,9 +171,9 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
   circle: {
-    width: 17,
-    height: 17,
-    borderRadius: 17 / 2,
+    width: 16,
+    height: 16,
+    borderRadius: 16 / 2,
     backgroundColor: "black",
     marginRight: 5,
   },
