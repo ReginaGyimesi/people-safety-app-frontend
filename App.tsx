@@ -6,6 +6,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import CustomBottomSheet from "./components/common/BottomSheet";
 import Loading from "./components/common/Loading";
 import SearchBar from "./components/common/SearchBar";
+import UserLocation from "./components/common/TrackingLocation";
 import Map from "./components/map/Map";
 import { API_ENDPOINTS } from "./routes/routes";
 import { filterCountry, filterLa, filterPostCode } from "./utils/common";
@@ -125,7 +126,6 @@ const App = memo(() => {
     setAddress(null);
   };
 
-  // Get current location.
   useEffect(() => {
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
@@ -164,6 +164,7 @@ const App = memo(() => {
   if (!myLocation) return <Loading />;
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
+      <UserLocation />
       <View style={styles.container}>
         <SearchBar searchLocation={searchLocation} />
         <Map
