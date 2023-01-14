@@ -1,3 +1,4 @@
+// Extract local authority from Google location search response.
 export const filterLa = (details: any) => {
   var filtered_array = details?.address_components.filter(
     function (address_component: { types: string | string[] }) {
@@ -9,6 +10,7 @@ export const filterLa = (details: any) => {
   return county;
 };
 
+// Extract country from Google location search response.
 export const filterCountry = (details: any) => {
   var filtered_array = details?.address_components.filter(
     function (address_component: { types: string | string[] }) {
@@ -20,6 +22,7 @@ export const filterCountry = (details: any) => {
   return country;
 };
 
+// Extract post code from Google location search response.
 export const filterPostCode = (details: any) => {
   var filtered_array = details?.address_components.filter(
     function (address_component: { types: string | string[] }) {

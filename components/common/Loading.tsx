@@ -1,6 +1,9 @@
 import React from "react";
 import { ActivityIndicator, StyleSheet } from "react-native";
 
+/**
+ * A custom hook loading components to use as fetching indicator.
+ */
 export default function Loading() {
   return <ActivityIndicator style={styles.loading} />;
 }

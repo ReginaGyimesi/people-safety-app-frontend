@@ -7,6 +7,11 @@ type Props = {
   onPress: () => void;
 };
 
+/**
+ * A custom button component to return to current location.
+ *
+ * @param onPress
+ */
 export default function CurrentLocationButton({ onPress }: Props) {
   return (
     <TouchableOpacity

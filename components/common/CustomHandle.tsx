@@ -20,19 +20,24 @@ export const transformOrigin = ({ x, y }, ...transformations) => {
     { translateY: y * -1 },
   ];
 };
-
 interface HandleProps extends BottomSheetHandleProps {
   style?: StyleProp<ViewStyle>;
 }
 
+/**
+ * A custom handle for bottom sheet component.
+ * @see https://gorhom.github.io/react-native-bottom-sheet/custom-handle/
+ *
+ * @param style
+ * @param animatedIndex
+ */
 const Handle: React.FC<HandleProps> = ({ style, animatedIndex }) => {
-  //#region animations
+  // Region animations.
   const indicatorTransformOriginY = useDerivedValue(() =>
     interpolate(animatedIndex.value, [0, 1, 2], [-1, 0, 1], Extrapolate.CLAMP)
   );
-  //#endregion
 
-  //#region styles
+  // Region styles.
   const containerStyle = useMemo(() => [styles.header, style], [style]);
   const containerAnimatedStyle = useAnimatedStyle(() => {
     const borderTopRadius = interpolate(
@@ -98,9 +103,7 @@ const Handle: React.FC<HandleProps> = ({ style, animatedIndex }) => {
       ),
     };
   });
-  //#endregion
 
-  // render
   return (
     <Animated.View
       style={[containerStyle, containerAnimatedStyle]}

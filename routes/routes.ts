@@ -1,4 +1,5 @@
 // API urls
 export const API_ENDPOINTS = {
-    allCrimesScot: "get-all-crimes"
-}
+  crimeByLa: "scot-crime-by-la", // By Local Authority.
+  crimeByPo: "crime-by-po", // By Post Code.
+};

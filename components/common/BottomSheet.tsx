@@ -11,46 +11,48 @@ type Props = {
   isLoading: boolean;
 };
 
+/**
+ * A custom bottom sheet component.
+ * @see https://gorhom.github.io/react-native-bottom-sheet/
+ *
+ * @param address
+ * @param data
+ * @param message
+ * @param isLoading
+ */
 export default function CustomBottomSheet({
   address,
   data,
   message,
   isLoading,
 }: Props) {
-  // ref
+  // bottom sheet ref
   const bottomSheetRef = useRef<BottomSheet>(null);
 
-  // variables
+  // bottom sheet snap points
   const snapPoints = useMemo(() => ["30%", "86%"], []);
   const snapPointsNone = useMemo(() => ["30%"], []);
 
-  // callbacks
-  const handleSheetChanges = useCallback((index: number) => {
-    console.log("handleSheetChanges", index);
-  }, []);
-
+  // select color of danger based on danger level
   const selectColor = (scoreCat: string) => {
     if (scoreCat === "high") {
-      return "#BD2031";
+      return colors.dangerRed;
     } else if (scoreCat == "average") {
-      return "rgba(252, 100, 45, 0.8)";
+      return colors.orange;
     } else if (scoreCat == "low") {
-      return "#228b22";
+      return colors.acceptGreen;
     }
   };
 
-  // renders
   return (
     <BottomSheet
       ref={bottomSheetRef}
       index={0}
       snapPoints={message ? snapPointsNone : snapPoints}
-      //onChange={handleSheetChanges}
       style={styles.sheet}
       handleComponent={Handle}
-      //animationConfigs={animationConfigs}
     >
-      <View style={styles.container}>
+      <View>
         <Text style={styles.heading}>Crime rate in</Text>
         <Text style={styles.text}>{address}</Text>
         {isLoading ? (
@@ -73,25 +75,25 @@ export default function CustomBottomSheet({
               </View>
             )}
 
-            <View>
-              {message ? (
+            {message ? (
+              <>
                 <Text style={[styles.body, styles.bold]}>{message}</Text>
-              ) : (
-                <>
-                  <Text style={[styles.subtitle, { marginLeft: 22 }]}>
-                    {data[0]?.score_category}
-                  </Text>
-                  <Text style={styles.body}>
-                    Annual crime rate in your local area is{" "}
-                    <Text style={{ fontWeight: "bold" }}>
-                      {data[0]?.total_crime}
-                    </Text>{" "}
-                    per 10 000 population. This can be rated as {data[0]?.score}{" "}
-                    out of 10 or {data[0]?.score_category} crime level.
-                  </Text>
-                </>
-              )}
-            </View>
+              </>
+            ) : (
+              <>
+                <Text style={[styles.subtitle, { marginLeft: 22 }]}>
+                  {data[0]?.score_category}
+                </Text>
+                <Text style={styles.body}>
+                  Annual crime rate in your local area is{" "}
+                  <Text style={{ fontWeight: "bold" }}>
+                    {data[0]?.total_crime}
+                  </Text>{" "}
+                  per 10 000 population. This can be rated as {data[0]?.score}{" "}
+                  out of 10 or {data[0]?.score_category} crime level.
+                </Text>
+              </>
+            )}
             {!message && (
               <View>
                 <Text style={[styles.subtitle, { marginTop: 20 }]}>
@@ -140,11 +142,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.34,
     shadowRadius: 6.27,
     paddingTop: 10,
+    paddingBottom: 10,
     paddingLeft: 20,
-  },
-  container: {
-    flex: 1,
-    paddingRight: 40,
+    paddingRight: 20,
   },
   heading: {
     fontSize: sizes.XL24,

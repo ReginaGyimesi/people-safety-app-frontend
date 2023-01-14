@@ -1,20 +1,28 @@
 import { API_GOOGLE_KEY } from "@env";
 import React from "react";
 import { StyleSheet, View } from "react-native";
-import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
+import {
+  GooglePlaceDetail,
+  GooglePlacesAutocomplete,
+} from "react-native-google-places-autocomplete";
 import { colors } from "../../styles";
 
 type Props = {
-  searchLocation: any;
+  searchLocation: (details: GooglePlaceDetail | null) => void;
 };
 
+/**
+ * A custom search bar component to search areas.
+ *
+ * @param searchLocation
+ */
 export default function SearchBar({ searchLocation }: Props) {
   return (
     <View style={styles.container}>
       <View style={styles.input}>
         <GooglePlacesAutocomplete
-          placeholder="Search post code..."
-          onPress={(data, details) => {
+          placeholder="Search places and postcodes..."
+          onPress={(_, details) => {
             // 'details' is provided when fetchDetails = true
             searchLocation(details);
           }}
@@ -24,8 +32,6 @@ export default function SearchBar({ searchLocation }: Props) {
             language: "en",
           }}
           fetchDetails={true}
-          // currentLocation={true}
-          // currentLocationLabel="Current location"
           styles={{
             textInputContainer: {
               borderWidth: 2,
@@ -57,21 +63,6 @@ export default function SearchBar({ searchLocation }: Props) {
             },
           }}
         />
-        {/* <TouchableOpacity style={styles.search} onPress={searchLocation}>
-          <Text>Search</Text>
-        </TouchableOpacity> */}
-        {/* <TextInput
-          onChangeText={setSearch}
-          value={search}
-          placeholder=""
-          placeholderTextColor={colors.primary}
-        /> */}
-        {/* <MaterialIcons
-          name="search"
-          size={20}
-          color={colors.primary}
-          style={styles.search}
-        /> */}
       </View>
     </View>
   );
