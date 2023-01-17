@@ -31,10 +31,16 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
-      }
+      },
+      "package": "com.redzs7.peoplesafetyappfrontend"
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "a9dc7db2-b811-4243-977e-3f7e67c468b9"
+      }
     }
   }
 }

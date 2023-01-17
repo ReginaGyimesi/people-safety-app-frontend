@@ -73,7 +73,7 @@ const styles = StyleSheet.create({
     width: "100%",
     paddingRight: 15,
     paddingLeft: 15,
-    top: 20,
+    marginTop: 34,
     position: "absolute",
     zIndex: 1,
   },
