@@ -4,6 +4,7 @@ import React, { createRef, memo, useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import CustomBottomSheet from "./components/common/BottomSheet";
+import CurrentLocationButton from "./components/common/CurrentLocationButton";
 import Loading from "./components/common/Loading";
 import SearchBar from "./components/common/SearchBar";
 import Map from "./components/map/Map";
@@ -24,7 +25,6 @@ const App = memo(() => {
 
   const fetchScottishData = async (la: any) => {
     setLoading(true);
-    console.log(`${API_BASE_URL}/${API_ENDPOINTS.crimeByLa}`);
     await fetch(`${API_BASE_URL}/${API_ENDPOINTS.crimeByLa}`, {
       method: "POST",
       headers: {
@@ -40,7 +40,6 @@ const App = memo(() => {
         console.log("fetching scot data...");
         setData(data);
         setLoading(false);
-        goToLocation;
       })
       .catch((err) => {
         console.log(err.message);
@@ -50,7 +49,6 @@ const App = memo(() => {
 
   const fetchEnglishData = async (po: any) => {
     setLoading(true);
-    console.log(`${API_BASE_URL}/${API_ENDPOINTS.crimeByLa}`);
     await fetch(`${API_BASE_URL}/${API_ENDPOINTS.crimeByPo}`, {
       method: "POST",
       headers: {
@@ -66,7 +64,6 @@ const App = memo(() => {
         console.log("fetching en data...");
         setEnData(data);
         setLoading(false);
-        goToLocation;
       })
       .catch((err) => {
         console.log(err.message);
@@ -99,10 +96,13 @@ const App = memo(() => {
     } else {
       setMessage("Sorry, no data available outside of England and Scotland 😔");
     }
+
+    goToLocation;
   };
 
   // Navigate to selected location or current location.
   const goToLocation = () => {
+    console.log("change location...");
     if (location) {
       mapRef.current?.animateToRegion({
         latitude: location.latitude,
@@ -158,8 +158,6 @@ const App = memo(() => {
     if (!location) getMyLocation();
   }, []);
 
-  console.log(data, enData);
-
   if (!myLocation) return <Loading />;
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
@@ -187,9 +185,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     position: "relative",
-  },
-  map: {
-    width: "100%",
     height: "100%",
   },
   activity: {

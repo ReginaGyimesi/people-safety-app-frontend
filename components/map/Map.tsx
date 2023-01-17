@@ -47,7 +47,7 @@ export default function Map({ mapRef, coords, onPress }: Props) {
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: "30%",
+    position: "relative",
   },
   map: {
     width: "100%",
