@@ -22,7 +22,7 @@ export async function schedulePushNotification({
       body: body,
       //data: { data: "goes here" },
       autoDismiss: true,
-      sticky: true,
+      sticky: false,
     },
     trigger: {},
   });

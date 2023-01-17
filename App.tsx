@@ -1,15 +1,27 @@
 import { API_BASE_URL } from "@env";
 import * as Location from "expo-location";
-import React, { createRef, memo, useEffect, useState } from "react";
+import React, { createRef, memo, useEffect, useRef, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import CustomBottomSheet from "./components/common/BottomSheet";
-import CurrentLocationButton from "./components/common/CurrentLocationButton";
 import Loading from "./components/common/Loading";
 import SearchBar from "./components/common/SearchBar";
 import Map from "./components/map/Map";
 import { API_ENDPOINTS } from "./routes/routes";
 import { filterCountry, filterLa, filterPostCode } from "./utils/common";
+import {
+  registerForPushNotificationsAsync,
+  schedulePushNotification,
+} from "./utils/notifs";
+import * as Notifications from "expo-notifications";
+
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: false,
+    shouldSetBadge: false,
+  }),
+});
 
 const App = memo(() => {
   const [location, setLocation] = useState<any>(null);
@@ -22,6 +34,11 @@ const App = memo(() => {
   const [isScot, setScot] = useState(false);
   const [isLoading, setLoading] = useState(false);
   const mapRef = createRef<any>();
+
+  const [expoPushToken, setExpoPushToken] = useState("");
+  const [notification, setNotification] = useState(false);
+  const notificationListener = useRef<any>();
+  const responseListener = useRef<any>();
 
   const fetchScottishData = async (la: any) => {
     setLoading(true);
@@ -45,6 +62,11 @@ const App = memo(() => {
         console.log(err.message);
         setLoading(false);
       });
+
+    // schedulePushNotification({
+    //   title: "Safety level",
+    //   body: `You've entered ${data[0]?.score} out of 10 or ${data[0]?.score_category} safety category area.`,
+    // });
   };
 
   const fetchEnglishData = async (po: any) => {
@@ -126,6 +148,29 @@ const App = memo(() => {
   };
 
   useEffect(() => {
+    registerForPushNotificationsAsync().then((token: any) =>
+      setExpoPushToken(token)
+    );
+
+    notificationListener.current =
+      Notifications.addNotificationReceivedListener((notification: any) => {
+        setNotification(notification);
+      });
+
+    responseListener.current =
+      Notifications.addNotificationResponseReceivedListener((response) => {
+        console.log(response);
+      });
+
+    return () => {
+      Notifications.removeNotificationSubscription(
+        notificationListener.current
+      );
+      Notifications.removeNotificationSubscription(responseListener.current);
+    };
+  }, []);
+
+  useEffect(() => {
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
@@ -157,6 +202,16 @@ const App = memo(() => {
     })();
     if (!location) getMyLocation();
   }, []);
+
+  useEffect(() => {
+    if (!isLoading && !isScot) {
+      schedulePushNotification({
+        title: address,
+        body: `You've entered ${enData[0]?.score} out of 10 or ${enData[0]?.score_category} danger area.`,
+      });
+    }
+  }, [enData, isLoading]);
+  console.log(enData, data);
 
   if (!myLocation) return <Loading />;
   return (
