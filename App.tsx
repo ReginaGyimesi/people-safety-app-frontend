@@ -116,7 +116,6 @@ const App = memo(() => {
     lng,
     details,
   }: Props) => {
-    console.log(postcode);
     const sanitisedPo = postcode?.replace(/\s/g, "");
 
     setLocation({
@@ -127,6 +126,10 @@ const App = memo(() => {
     setAddress(details?.formatted_address);
     setMessage(null);
 
+    console.log("country ", country);
+
+    // TODO: location names might differ from stored names
+    if (localAuth == "Glasgow") localAuth = "Glasgow City";
     if (country == "Scotland") {
       setScot(true);
       fetchScottishData(localAuth);
@@ -150,11 +153,11 @@ const App = memo(() => {
     }
     if (myLocation) {
       fetchDetailsBasedOnLocation({
-        country: myAddress.region,
+        country: myAddress?.region,
         lat: myLocation.latitude,
         lng: myLocation.longitude,
-        localAuth: myAddress.city,
-        postcode: myAddress.postalCode,
+        localAuth: myAddress?.city,
+        postcode: myAddress?.postalCode,
       });
       mapRef.current?.animateToRegion({
         latitude: myLocation.latitude,
@@ -189,21 +192,26 @@ const App = memo(() => {
   useEffect(() => {
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
+
       if (status !== "granted") {
         // London is default location if location sharing is not allowed.
         setMyLocation({
           latitude: 51.513955,
           longitude: -0.132913,
         });
+
+        // Get location details from longitude and latitude.
         let response = await Location.reverseGeocodeAsync({
-          latitude: myLocation.latitude,
-          longitude: myLocation.longitude,
+          latitude: 51.513955,
+          longitude: -0.132913,
         });
         setMyAddress(response[0]);
         fetchDetailsBasedOnLocation({
-          country: myAddress.region,
-          postcode: myAddress.postalCode,
-          localAuth: myAddress.city,
+          country: response[0].region,
+          lat: 51.513955,
+          lng: -0.132913,
+          postcode: response[0].postalCode,
+          localAuth: response[0].city,
         });
 
         console.log("location status denied");
@@ -225,21 +233,35 @@ const App = memo(() => {
         longitude,
       });
 
-      if (response[0].city != "UK" || response[0].region != "England")
+      setMyAddress(response[0]);
+      setMyLocation(loc.coords);
+      if (
+        response[0].city != "UK" ||
+        response[0].country != "United Kingdom" ||
+        (response[0].region != "England" && response[0].region != "Scotland")
+      )
         setMessage(
           "Sorry, no data available outside of England and Scotland 😔"
         );
-      setMyAddress(response);
-      setMyLocation(loc.coords);
 
-      if (!location && enData.length == 0 && data.length == 0)
+      if (enData.length == 0 && data.length == 0)
         fetchDetailsBasedOnLocation({
           country: response[0].region,
+          lat: loc.coords.latitude,
+          lng: loc.coords.longitude,
+          localAuth: response[0].city,
           postcode: response[0].postalCode,
-          localAuth: response[0].subregion,
         });
     })();
   }, []);
+
+  useEffect(() => {
+    if (enData[0] == "No data found." || data[0] == "No data found.") {
+      setMessage(
+        "Oops, nothing to see here. 👀 Try searching with a full postcode."
+      );
+    }
+  }, [enData, data]);
 
   // useEffect(() => {
   //   if (!isLoading && !isScot) {
@@ -256,7 +278,10 @@ const App = memo(() => {
   //   }
   // }, [enData, data, isLoading]);
 
-  if (!myLocation) return <Loading />;
+  // Return loading screen if default or current location and address are not present or data cannot be fetched.
+  if (!myLocation && !myAddress && (enData.length == 0 || data.length == 0))
+    return <Loading />;
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <View style={styles.container}>

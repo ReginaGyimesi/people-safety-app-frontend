@@ -28,7 +28,7 @@ export default function SearchBar({ searchLocation }: Props) {
             searchLocation({
               country: filterCountry(details),
               localAuth: filterLa(details),
-              postcode: filterPostCode(details).short_name,
+              postcode: filterPostCode(details)?.short_name,
               lat: details?.geometry.location.lat,
               lng: details?.geometry.location.lng,
               details: details,

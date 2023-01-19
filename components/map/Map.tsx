@@ -31,6 +31,7 @@ export default function Map({ mapRef, coords, goToMyLocation }: Props) {
           latitudeDelta: 0.0421,
           longitudeDelta: 0.0421,
         }}
+        showsUserLocation={true}
       >
         <Marker
           coordinate={{
