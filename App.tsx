@@ -296,6 +296,7 @@ const App = memo(() => {
             location?.latitude || location?.longitude ? location : myLocation
           }
           goToMyLocation={goToLocation}
+          setMyLocation={setMyLocation}
         />
         <CustomBottomSheet
           address={

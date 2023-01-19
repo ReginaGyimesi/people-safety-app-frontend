@@ -1,13 +1,14 @@
-import React, { RefObject, useEffect, useState, memo, useMemo } from "react";
+import * as Location from "expo-location";
+import React, { Dispatch, memo, RefObject, useEffect } from "react";
 import { StyleSheet, View } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import CurrentLocationButton from "../common/CurrentLocationButton";
-import * as Location from "expo-location";
 
 type Props = {
   mapRef: RefObject<any>;
   coords: any;
   goToMyLocation: () => void;
+  setMyLocation: Dispatch<any>;
 };
 
 /**
@@ -16,8 +17,9 @@ type Props = {
  * @param mapRef
  * @param coords
  * @param goToMyLocation
+ * @param setMyLocation
  */
-const Map = memo(({ mapRef, coords, goToMyLocation }: Props) => {
+const Map = memo(({ mapRef, coords, goToMyLocation, setMyLocation }: Props) => {
   // Watch location.
   useEffect(() => {
     async function getLocation() {
@@ -32,6 +34,8 @@ const Map = memo(({ mapRef, coords, goToMyLocation }: Props) => {
 
       // Set coords.
       coords = { latitude, longitude };
+
+      setMyLocation(coords);
     }
     getLocation();
   }, []);
