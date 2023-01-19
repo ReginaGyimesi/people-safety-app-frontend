@@ -1,7 +1,8 @@
-import React, { RefObject } from "react";
+import React, { RefObject, useEffect, useState, memo, useMemo } from "react";
 import { StyleSheet, View } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import CurrentLocationButton from "../common/CurrentLocationButton";
+import * as Location from "expo-location";
 
 type Props = {
   mapRef: RefObject<any>;
@@ -16,14 +17,30 @@ type Props = {
  * @param coords
  * @param goToMyLocation
  */
-export default function Map({ mapRef, coords, goToMyLocation }: Props) {
+const Map = memo(({ mapRef, coords, goToMyLocation }: Props) => {
+  // Watch location.
+  useEffect(() => {
+    async function getLocation() {
+      const loc = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.BestForNavigation,
+        timeInterval: 1,
+        distanceInterval: 1,
+      });
+
+      // Location longitude and latitude.
+      const { latitude, longitude } = loc.coords;
+
+      // Set coords.
+      coords = { latitude, longitude };
+    }
+    getLocation();
+  }, []);
+
   return (
     <View style={styles.container}>
       <MapView
         style={styles.map}
         ref={mapRef}
-        minZoomLevel={15}
-        maxZoomLevel={15}
         showsMyLocationButton={false}
         region={{
           latitude: coords?.latitude,
@@ -32,6 +49,7 @@ export default function Map({ mapRef, coords, goToMyLocation }: Props) {
           longitudeDelta: 0.0421,
         }}
         showsUserLocation={true}
+        followsUserLocation={true}
       >
         <Marker
           coordinate={{
@@ -44,7 +62,9 @@ export default function Map({ mapRef, coords, goToMyLocation }: Props) {
       <CurrentLocationButton onPress={goToMyLocation} />
     </View>
   );
-}
+});
+
+export default Map;
 
 const styles = StyleSheet.create({
   container: {

@@ -15,7 +15,6 @@ import Loading from "./components/common/Loading";
 import SearchBar from "./components/common/SearchBar";
 import Map from "./components/map/Map";
 import { API_ENDPOINTS } from "./routes/routes";
-import { filterCountry, filterLa, filterPostCode } from "./utils/common";
 import {
   registerForPushNotificationsAsync,
   schedulePushNotification,
@@ -51,10 +50,10 @@ const App = memo(() => {
   const [isLoading, setLoading] = useState(false);
   const mapRef = createRef<any>();
 
-  const [expoPushToken, setExpoPushToken] = useState("");
-  const [notification, setNotification] = useState(false);
-  const notificationListener = useRef<any>();
-  const responseListener = useRef<any>();
+  //const [expoPushToken, setExpoPushToken] = useState("");
+  //const [notification, setNotification] = useState(false);
+  //const notificationListener = useRef<any>();
+  //const responseListener = useRef<any>();
 
   // Fetch Scottish data by local authority.
   const fetchScottishData = async (la: any) => {
@@ -123,6 +122,8 @@ const App = memo(() => {
       longitude: lng,
     });
 
+    console.log(details);
+
     setAddress(details?.formatted_address);
     setMessage(null);
 
@@ -145,7 +146,8 @@ const App = memo(() => {
 
   // Navigate to selected location or current location.
   const goToLocation = () => {
-    if (location) {
+    if (location.latitude && location.longitude) {
+      console.log("navigating to location...");
       mapRef.current?.animateToRegion({
         latitude: location?.latitude,
         longitude: location?.longitude,
@@ -166,28 +168,28 @@ const App = memo(() => {
     }
   };
 
-  useEffect(() => {
-    registerForPushNotificationsAsync().then((token: any) =>
-      setExpoPushToken(token)
-    );
+  // useEffect(() => {
+  //   registerForPushNotificationsAsync().then((token: any) =>
+  //     setExpoPushToken(token)
+  //   );
 
-    notificationListener.current =
-      Notifications.addNotificationReceivedListener((notification: any) => {
-        setNotification(notification);
-      });
+  //   notificationListener.current =
+  //     Notifications.addNotificationReceivedListener((notification: any) => {
+  //       setNotification(notification);
+  //     });
 
-    responseListener.current =
-      Notifications.addNotificationResponseReceivedListener((response) => {
-        //console.log(response);
-      });
+  //   responseListener.current =
+  //     Notifications.addNotificationResponseReceivedListener((response) => {
+  //       //console.log(response);
+  //     });
 
-    return () => {
-      Notifications.removeNotificationSubscription(
-        notificationListener.current
-      );
-      Notifications.removeNotificationSubscription(responseListener.current);
-    };
-  }, []);
+  //   return () => {
+  //     Notifications.removeNotificationSubscription(
+  //       notificationListener.current
+  //     );
+  //     Notifications.removeNotificationSubscription(responseListener.current);
+  //   };
+  // }, []);
 
   useEffect(() => {
     (async () => {
@@ -221,7 +223,7 @@ const App = memo(() => {
       let loc = await Location.getCurrentPositionAsync({
         accuracy: Location.Accuracy.Highest,
         timeInterval: 1,
-        distanceInterval: 80,
+        distanceInterval: 1,
       });
 
       // Location longitude and latitude.
@@ -234,7 +236,7 @@ const App = memo(() => {
       });
 
       setMyAddress(response[0]);
-      setMyLocation(loc.coords);
+      setMyLocation(loc?.coords);
       if (
         response[0].city != "UK" ||
         response[0].country != "United Kingdom" ||
@@ -247,8 +249,8 @@ const App = memo(() => {
       if (enData.length == 0 && data.length == 0)
         fetchDetailsBasedOnLocation({
           country: response[0].region,
-          lat: loc.coords.latitude,
-          lng: loc.coords.longitude,
+          lat: loc?.coords.latitude,
+          lng: loc?.coords.longitude,
           localAuth: response[0].city,
           postcode: response[0].postalCode,
         });
@@ -262,6 +264,8 @@ const App = memo(() => {
       );
     }
   }, [enData, data]);
+
+  console.log(location, myLocation);
 
   // useEffect(() => {
   //   if (!isLoading && !isScot) {
