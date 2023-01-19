@@ -1,33 +1,13 @@
 import { API_BASE_URL } from "@env";
 import * as Location from "expo-location";
-import React, {
-  createRef,
-  memo,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import React, { createRef, memo, useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import CustomBottomSheet from "./components/common/BottomSheet";
 import Loading from "./components/common/Loading";
-import SearchBar from "./components/common/SearchBar";
+import CustomBottomSheet from "./components/home/BottomSheet";
+import SearchBar from "./components/home/SearchBar";
 import Map from "./components/map/Map";
 import { API_ENDPOINTS } from "./routes/routes";
-import {
-  registerForPushNotificationsAsync,
-  schedulePushNotification,
-} from "./utils/notifs";
-import * as Notifications from "expo-notifications";
-
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: false,
-    shouldSetBadge: false,
-  }),
-});
 
 type Props = {
   country?: string | null;
@@ -49,11 +29,6 @@ const App = memo(() => {
   const [isScot, setScot] = useState(false);
   const [isLoading, setLoading] = useState(false);
   const mapRef = createRef<any>();
-
-  //const [expoPushToken, setExpoPushToken] = useState("");
-  //const [notification, setNotification] = useState(false);
-  //const notificationListener = useRef<any>();
-  //const responseListener = useRef<any>();
 
   // Fetch Scottish data by local authority.
   const fetchScottishData = async (la: any) => {
@@ -168,29 +143,6 @@ const App = memo(() => {
     }
   };
 
-  // useEffect(() => {
-  //   registerForPushNotificationsAsync().then((token: any) =>
-  //     setExpoPushToken(token)
-  //   );
-
-  //   notificationListener.current =
-  //     Notifications.addNotificationReceivedListener((notification: any) => {
-  //       setNotification(notification);
-  //     });
-
-  //   responseListener.current =
-  //     Notifications.addNotificationResponseReceivedListener((response) => {
-  //       //console.log(response);
-  //     });
-
-  //   return () => {
-  //     Notifications.removeNotificationSubscription(
-  //       notificationListener.current
-  //     );
-  //     Notifications.removeNotificationSubscription(responseListener.current);
-  //   };
-  // }, []);
-
   useEffect(() => {
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
@@ -264,23 +216,6 @@ const App = memo(() => {
       );
     }
   }, [enData, data]);
-
-  console.log(location, myLocation);
-
-  // useEffect(() => {
-  //   if (!isLoading && !isScot) {
-  //     schedulePushNotification({
-  //       title: address ?? "",
-  //       body: `You've entered ${enData[0]?.score} out of 10 or ${enData[0]?.score_category} danger area.`,
-  //     });
-  //   }
-  //   if (!isLoading && isScot) {
-  //     schedulePushNotification({
-  //       title: address ?? "",
-  //       body: `You've entered ${data[0]?.score} out of 10 or ${data[0]?.score_category} danger area.`,
-  //     });
-  //   }
-  // }, [enData, data, isLoading]);
 
   // Return loading screen if default or current location and address are not present or data cannot be fetched.
   if (!myLocation && !myAddress && (enData.length == 0 || data.length == 0))

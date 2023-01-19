@@ -2,7 +2,7 @@ import * as Location from "expo-location";
 import React, { Dispatch, memo, RefObject, useEffect } from "react";
 import { StyleSheet, View } from "react-native";
 import MapView, { Marker } from "react-native-maps";
-import CurrentLocationButton from "../common/CurrentLocationButton";
+import CurrentLocationButton from "../home/CurrentLocationButton";
 
 type Props = {
   mapRef: RefObject<any>;
