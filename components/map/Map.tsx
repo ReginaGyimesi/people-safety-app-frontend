@@ -6,7 +6,7 @@ import CurrentLocationButton from "../common/CurrentLocationButton";
 type Props = {
   mapRef: RefObject<any>;
   coords: any;
-  onPress: () => void;
+  goToMyLocation: () => void;
 };
 
 /**
@@ -14,9 +14,9 @@ type Props = {
  *
  * @param mapRef
  * @param coords
- * @param onPress
+ * @param goToMyLocation
  */
-export default function Map({ mapRef, coords, onPress }: Props) {
+export default function Map({ mapRef, coords, goToMyLocation }: Props) {
   return (
     <View style={styles.container}>
       <MapView
@@ -40,7 +40,7 @@ export default function Map({ mapRef, coords, onPress }: Props) {
         />
       </MapView>
 
-      <CurrentLocationButton onPress={onPress} />
+      <CurrentLocationButton onPress={goToMyLocation} />
     </View>
   );
 }

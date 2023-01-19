@@ -6,9 +6,10 @@ import {
   GooglePlacesAutocomplete,
 } from "react-native-google-places-autocomplete";
 import { colors } from "../../styles";
+import { filterCountry, filterLa, filterPostCode } from "../../utils/common";
 
 type Props = {
-  searchLocation: (details: GooglePlaceDetail | null) => void;
+  searchLocation: any;
 };
 
 /**
@@ -24,7 +25,14 @@ export default function SearchBar({ searchLocation }: Props) {
           placeholder="Search places and postcodes..."
           onPress={(_, details) => {
             // 'details' is provided when fetchDetails = true
-            searchLocation(details);
+            searchLocation({
+              country: filterCountry(details),
+              localAuth: filterLa(details),
+              postcode: filterPostCode(details).short_name,
+              lat: details?.geometry.location.lat,
+              lng: details?.geometry.location.lng,
+              details: details,
+            });
           }}
           query={{
             key: API_GOOGLE_KEY,
