@@ -97,14 +97,13 @@ const App = memo(() => {
       longitude: lng,
     });
 
-    console.log(details);
-
     setAddress(details?.formatted_address);
     setMessage(null);
 
-    console.log("country ", country);
+    console.log("country", country);
+    console.log("local auth", localAuth);
 
-    // TODO: location names might differ from stored names
+    // FIXME: location names might differ from stored names
     if (localAuth == "Glasgow") localAuth = "Glasgow City";
     if (country == "Scotland") {
       setScot(true);
@@ -113,7 +112,9 @@ const App = memo(() => {
       setScot(false);
       fetchEnglishData(sanitisedPo);
     } else {
-      setMessage("Sorry, no data available outside of England and Scotland 😔");
+      setMessage(
+        "Sorry, no data available outside of England and Scotland 😔 We're working on it!"
+      );
     }
 
     goToLocation;
@@ -121,6 +122,7 @@ const App = memo(() => {
 
   // Navigate to selected location or current location.
   const goToLocation = () => {
+    console.log(myAddress);
     if (location.latitude && location.longitude) {
       console.log("navigating to location...");
       mapRef.current?.animateToRegion({
@@ -133,7 +135,7 @@ const App = memo(() => {
         country: myAddress?.region,
         lat: myLocation.latitude,
         lng: myLocation.longitude,
-        localAuth: myAddress?.city,
+        localAuth: myAddress?.subregion,
         postcode: myAddress?.postalCode,
       });
       mapRef.current?.animateToRegion({
@@ -145,6 +147,7 @@ const App = memo(() => {
 
   useEffect(() => {
     (async () => {
+      // Ask for location sharing permission.
       let { status } = await Location.requestForegroundPermissionsAsync();
 
       if (status !== "granted") {
@@ -165,7 +168,7 @@ const App = memo(() => {
           lat: 51.513955,
           lng: -0.132913,
           postcode: response[0].postalCode,
-          localAuth: response[0].city,
+          localAuth: response[0].subregion,
         });
 
         console.log("location status denied");
@@ -203,14 +206,18 @@ const App = memo(() => {
           country: response[0].region,
           lat: loc?.coords.latitude,
           lng: loc?.coords.longitude,
-          localAuth: response[0].city,
+          localAuth: response[0].subregion,
           postcode: response[0].postalCode,
         });
     })();
   }, []);
 
   useEffect(() => {
-    if (enData[0] == "No data found." || data[0] == "No data found.") {
+    if (enData[0] == "No data found.") {
+      setMessage(
+        "Oops, nothing to see here. 👀 Try searching with a full postcode."
+      );
+    } else if (data[0] == "No data found.") {
       setMessage(
         "Oops, nothing to see here. 👀 Try searching with a full postcode."
       );
@@ -232,6 +239,9 @@ const App = memo(() => {
           }
           goToMyLocation={goToLocation}
           setMyLocation={setMyLocation}
+          data={data}
+          enData={enData}
+          address={`${myAddress?.street}, ${myAddress?.postalCode}, ${myAddress?.city}, ${myAddress?.country}`}
         />
         <CustomBottomSheet
           address={

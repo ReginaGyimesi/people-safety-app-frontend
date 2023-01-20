@@ -9,6 +9,9 @@ type Props = {
   coords: any;
   goToMyLocation: () => void;
   setMyLocation: Dispatch<any>;
+  address: any;
+  enData: any;
+  data: any;
 };
 
 /**
@@ -19,54 +22,71 @@ type Props = {
  * @param goToMyLocation
  * @param setMyLocation
  */
-const Map = memo(({ mapRef, coords, goToMyLocation, setMyLocation }: Props) => {
-  // Watch location.
-  useEffect(() => {
-    async function getLocation() {
-      const loc = await Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.BestForNavigation,
-        timeInterval: 1,
-        distanceInterval: 1,
-      });
+const Map = memo(
+  ({
+    mapRef,
+    coords,
+    goToMyLocation,
+    setMyLocation,
+    address,
+    enData,
+    data,
+  }: Props) => {
+    // Watch location.
+    useEffect(() => {
+      async function getLocation() {
+        const loc = await Location.getCurrentPositionAsync({
+          accuracy: Location.Accuracy.BestForNavigation,
+          timeInterval: 1,
+          distanceInterval: 1,
+        });
 
-      // Location longitude and latitude.
-      const { latitude, longitude } = loc.coords;
+        // Location longitude and latitude.
+        const { latitude, longitude } = loc.coords;
 
-      // Set coords.
-      coords = { latitude, longitude };
+        // Set coords.
+        coords = { latitude, longitude };
 
-      setMyLocation(coords);
-    }
-    getLocation();
-  }, []);
+        let response = await Location.reverseGeocodeAsync({
+          latitude,
+          longitude,
+        });
 
-  return (
-    <View style={styles.container}>
-      <MapView
-        style={styles.map}
-        ref={mapRef}
-        showsMyLocationButton={false}
-        region={{
-          latitude: coords?.latitude,
-          longitude: coords?.longitude,
-          latitudeDelta: 0.0421,
-          longitudeDelta: 0.0421,
-        }}
-        showsUserLocation={true}
-        followsUserLocation={true}
-      >
-        <Marker
-          coordinate={{
+        console.log(response[0]);
+
+        setMyLocation(coords);
+      }
+      getLocation();
+    }, []);
+
+    return (
+      <View style={styles.container}>
+        <MapView
+          style={styles.map}
+          ref={mapRef}
+          showsMyLocationButton={false}
+          region={{
             latitude: coords?.latitude,
             longitude: coords?.longitude,
+            latitudeDelta: 0.0421,
+            longitudeDelta: 0.0421,
           }}
-        />
-      </MapView>
+          showsUserLocation={true}
+          followsUserLocation={true}
+        >
+          <Marker
+            coordinate={{
+              latitude: coords?.latitude,
+              longitude: coords?.longitude,
+            }}
+          />
+        </MapView>
 
-      <CurrentLocationButton onPress={goToMyLocation} />
-    </View>
-  );
-});
+        <CurrentLocationButton onPress={goToMyLocation} />
+      </View>
+    );
+  }
+);
 
 export default Map;
 

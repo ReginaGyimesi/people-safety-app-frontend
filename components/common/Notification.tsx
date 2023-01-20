@@ -45,11 +45,6 @@ export default function Notification() {
 
   // useEffect(() => {
   //   if (!isLoading && !isScot) {
-  //     schedulePushNotification({
-  //       title: address ?? "",
-  //       body: `You've entered ${enData[0]?.score} out of 10 or ${enData[0]?.score_category} danger area.`,
-  //     });
-  //   }
   //   if (!isLoading && isScot) {
   //     schedulePushNotification({
   //       title: address ?? "",
