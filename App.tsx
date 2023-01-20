@@ -1,4 +1,3 @@
-import { API_BASE_URL } from "@env";
 import * as Location from "expo-location";
 import React, { createRef, memo, useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
@@ -7,7 +6,7 @@ import Loading from "./components/common/Loading";
 import CustomBottomSheet from "./components/home/BottomSheet";
 import SearchBar from "./components/home/SearchBar";
 import Map from "./components/map/Map";
-import { API_ENDPOINTS } from "./routes/routes";
+import { fetchEnglishData, fetchScottishData } from "./utils/api";
 
 type Props = {
   country?: string | null;
@@ -29,56 +28,6 @@ const App = memo(() => {
   const [isScot, setScot] = useState(false);
   const [isLoading, setLoading] = useState(false);
   const mapRef = createRef<any>();
-
-  // Fetch Scottish data by local authority.
-  const fetchScottishData = async (la: any) => {
-    setLoading(true);
-    await fetch(`${API_BASE_URL}/${API_ENDPOINTS.crimeByLa}`, {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        la: la,
-      }),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        console.log("fetching scot data...");
-        setData(data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.log(err.message);
-        setLoading(false);
-      });
-  };
-
-  // Fetch English data by postcode.
-  const fetchEnglishData = async (po: any) => {
-    setLoading(true);
-    await fetch(`${API_BASE_URL}/${API_ENDPOINTS.crimeByPo}`, {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        po: po,
-      }),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        console.log("fetching en data...");
-        setEnData(data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.log(err.message);
-        setLoading(false);
-      });
-  };
 
   // Fetch details if country is either Scotland or England
   // and navigate to location.
@@ -105,12 +54,24 @@ const App = memo(() => {
 
     // FIXME: location names might differ from stored names
     if (localAuth == "Glasgow") localAuth = "Glasgow City";
+    if (localAuth == "West Dunbartonshire Council")
+      localAuth = "West Dunbartonshire";
+    if (localAuth == "East Dunbartonshire Council")
+      localAuth = "East Dunbartonshire";
     if (country == "Scotland") {
       setScot(true);
-      fetchScottishData(localAuth);
+      fetchScottishData({
+        la: localAuth,
+        setData: setData,
+        setLoading: setLoading,
+      });
     } else if (country == "England") {
       setScot(false);
-      fetchEnglishData(sanitisedPo);
+      fetchEnglishData({
+        po: sanitisedPo,
+        setData: setEnData,
+        setLoading: setLoading,
+      });
     } else {
       setMessage(
         "Sorry, no data available outside of England and Scotland 😔 We're working on it!"
@@ -122,7 +83,6 @@ const App = memo(() => {
 
   // Navigate to selected location or current location.
   const goToLocation = () => {
-    console.log(myAddress);
     if (location.latitude && location.longitude) {
       console.log("navigating to location...");
       mapRef.current?.animateToRegion({
@@ -224,6 +184,8 @@ const App = memo(() => {
     }
   }, [enData, data]);
 
+  console.log(data);
+
   // Return loading screen if default or current location and address are not present or data cannot be fetched.
   if (!myLocation && !myAddress && (enData.length == 0 || data.length == 0))
     return <Loading />;
@@ -239,15 +201,19 @@ const App = memo(() => {
           }
           goToMyLocation={goToLocation}
           setMyLocation={setMyLocation}
-          data={data}
-          enData={enData}
-          address={`${myAddress?.street}, ${myAddress?.postalCode}, ${myAddress?.city}, ${myAddress?.country}`}
+          address={
+            (!myAddress.street ? "" : `${myAddress?.street}, `) +
+            `${myAddress?.postalCode}, ${myAddress?.city}, ${myAddress?.country}`
+          }
+          setData={setData}
+          setMyAddress={setMyAddress}
         />
         <CustomBottomSheet
           address={
             address
               ? address
-              : `${myAddress?.street}, ${myAddress?.postalCode}, ${myAddress?.city}, ${myAddress?.country}`
+              : (!myAddress.street ? "" : `${myAddress?.street}, `) +
+                `${myAddress?.postalCode}, ${myAddress?.city}, ${myAddress?.country}`
           }
           data={!isScot ? enData : data}
           message={message}

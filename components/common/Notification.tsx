@@ -5,7 +5,7 @@ import { registerForPushNotificationsAsync } from "../../utils/notifs";
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowAlert: true,
-    shouldPlaySound: false,
+    shouldPlaySound: true,
     shouldSetBadge: false,
   }),
 });
