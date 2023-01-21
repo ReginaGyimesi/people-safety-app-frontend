@@ -1,11 +1,9 @@
 import { API_GOOGLE_KEY } from "@env";
 import React from "react";
 import { StyleSheet, View } from "react-native";
-import {
-  GooglePlaceDetail,
-  GooglePlacesAutocomplete,
-} from "react-native-google-places-autocomplete";
-import { colors } from "../../styles";
+import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
+import { baseColors } from "../../styles/colors";
+import { useTheme } from "../../theme/ThemeProvider";
 import { filterCountry, filterLa, filterPostCode } from "../../utils/common";
 
 type Props = {
@@ -18,6 +16,8 @@ type Props = {
  * @param searchLocation
  */
 export default function SearchBar({ searchLocation }: Props) {
+  const { colors } = useTheme();
+
   return (
     <View style={styles.container}>
       <View style={styles.input}>
@@ -43,11 +43,11 @@ export default function SearchBar({ searchLocation }: Props) {
           styles={{
             textInputContainer: {
               borderWidth: 2,
-              borderColor: colors.primary,
+              borderColor: baseColors.primary,
               width: "100%",
               paddingLeft: 10,
               paddingRight: 10,
-              backgroundColor: colors.white,
+              backgroundColor: baseColors.white,
               borderRadius: 23,
               alignItems: "center",
               shadowColor: "#000",

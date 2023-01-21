@@ -1,14 +1,15 @@
 import { API_BASE_URL } from "@env";
 import * as Location from "expo-location";
-import { scheduleNotificationAsync } from "expo-notifications";
 import React, { Dispatch, memo, RefObject, useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import { API_ENDPOINTS } from "../../routes/routes";
-import { fetchPointInLa, fetchScottishData } from "../../utils/api";
+import { colors } from "../../styles";
+import { useTheme } from "../../theme/ThemeProvider";
 import { schedulePushNotification } from "../../utils/notifs";
 import Notification from "../common/Notification";
 import CurrentLocationButton from "../home/CurrentLocationButton";
+import DarkModeButton from "../home/DarkModeButton";
 
 type Props = {
   mapRef: RefObject<any>;
@@ -18,7 +19,6 @@ type Props = {
   address: any;
   setData: Dispatch<any>;
   setMyAddress: Dispatch<any>;
-  myLocation: any;
 };
 
 /**
@@ -30,7 +30,6 @@ type Props = {
  * @param setMyLocation
  * @param setData
  * @param setMyAddress
- * @param myLocation
  */
 const Map = ({
   mapRef,
@@ -39,10 +38,14 @@ const Map = ({
   setMyLocation,
   setData,
   setMyAddress,
-  myLocation,
 }: Props) => {
+  const { isDark } = useTheme();
   let originalSubregion: string | null;
   let nextSubregion: string | null;
+
+  //TODO: implement this so it sends
+  let originalPostcode;
+  let nextPostcode;
 
   // Watch location.
   useEffect(() => {
@@ -74,6 +77,7 @@ const Map = ({
 
   useEffect(() => {
     let interval = setInterval(async () => {
+      console.log("interval");
       const loc = await Location.getCurrentPositionAsync({
         accuracy: Location.Accuracy.BestForNavigation,
         timeInterval: 1,
@@ -91,41 +95,84 @@ const Map = ({
         longitude,
       });
 
-      nextSubregion = response[0].subregion;
+      if (response[0].country == "Scotland") {
+        nextSubregion = response[0].subregion;
 
-      // If next region does not equal starting point.
-      if (nextSubregion != originalSubregion) {
-        originalSubregion = nextSubregion;
+        console.log("region", originalSubregion);
 
-        if (response[0].subregion == "Glasgow")
-          response[0].subregion = "Glasgow City";
+        // If next region does not equal starting point.
+        if (nextSubregion != originalSubregion) {
+          originalSubregion = nextSubregion;
 
-        await fetch(`${API_BASE_URL}/${API_ENDPOINTS.crimeByLa}`, {
-          method: "POST",
-          headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            la: nextSubregion,
-          }),
-        })
-          .then((response) => response.json())
-          .then((data) => {
-            console.log("fetching scot data...");
-            setData(data);
-            setMyLocation(coords);
-            setMyAddress(response[0]);
-            schedulePushNotification({
-              title:
-                (!response[0].street ? "" : `${response[0]?.street}, `) +
-                `${response[0].postalCode}, ${response[0].city}, ${response[0].country}`,
-              body: `You've entered ${data[0].score} out of 10 or ${data[0].score_category} danger area.`,
-            });
+          if (response[0].subregion == "Glasgow")
+            response[0].subregion = "Glasgow City";
+
+          await fetch(`${API_BASE_URL}/${API_ENDPOINTS.crimeByLa}`, {
+            method: "POST",
+            headers: {
+              Accept: "application/json",
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              la: nextSubregion,
+            }),
           })
-          .catch((err) => {
-            console.log(err.message);
-          });
+            .then((response) => response.json())
+            .then((data) => {
+              console.log("fetching scot data...");
+              setData(data);
+              setMyLocation(coords);
+              setMyAddress(response[0]);
+              schedulePushNotification({
+                title:
+                  (!response[0].street ? "" : `${response[0]?.street}, `) +
+                  `${response[0].postalCode}, ${response[0].city}, ${response[0].country}`,
+                body: `You've entered ${data[0].score} out of 10 or ${data[0].score_category} danger area.`,
+              });
+            })
+            .catch((err) => {
+              console.log(err.message);
+            });
+        }
+      } else if (response[0].country == "England") {
+        nextSubregion = response[0].subregion;
+
+        console.log("region", originalSubregion);
+
+        // If next region does not equal starting point.
+        if (nextSubregion != originalSubregion) {
+          originalSubregion = nextSubregion;
+
+          if (response[0].subregion == "Glasgow")
+            response[0].subregion = "Glasgow City";
+
+          await fetch(`${API_BASE_URL}/${API_ENDPOINTS.crimeByLa}`, {
+            method: "POST",
+            headers: {
+              Accept: "application/json",
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              la: nextSubregion,
+            }),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              console.log("fetching scot data...");
+              setData(data);
+              setMyLocation(coords);
+              setMyAddress(response[0]);
+              schedulePushNotification({
+                title:
+                  (!response[0].street ? "" : `${response[0]?.street}, `) +
+                  `${response[0].postalCode}, ${response[0].city}, ${response[0].country}`,
+                body: `You've entered ${data[0].score} out of 10 or ${data[0].score_category} danger area.`,
+              });
+            })
+            .catch((err) => {
+              console.log(err.message);
+            });
+        }
       }
     }, 10000);
     return () => {
@@ -148,6 +195,9 @@ const Map = ({
         }}
         showsUserLocation={true}
         followsUserLocation={true}
+        customMapStyle={isDark ? darkMap : []}
+        //@ts-ignore
+        provider={MapView.PROVIDER_GOOGLE}
       >
         <Marker
           coordinate={{
@@ -158,6 +208,7 @@ const Map = ({
       </MapView>
 
       <CurrentLocationButton onPress={goToMyLocation} />
+      <DarkModeButton />
     </View>
   );
 };
@@ -173,3 +224,165 @@ const styles = StyleSheet.create({
     height: "100%",
   },
 });
+
+const darkMap = [
+  {
+    elementType: "geometry",
+    stylers: [
+      {
+        color: "#242f3e",
+      },
+    ],
+  },
+  {
+    elementType: "labels.text.fill",
+    stylers: [
+      {
+        color: "#746855",
+      },
+    ],
+  },
+  {
+    elementType: "labels.text.stroke",
+    stylers: [
+      {
+        color: "#242f3e",
+      },
+    ],
+  },
+  {
+    featureType: "administrative.locality",
+    elementType: "labels.text.fill",
+    stylers: [
+      {
+        color: "#d59563",
+      },
+    ],
+  },
+  {
+    featureType: "poi",
+    elementType: "labels.text.fill",
+    stylers: [
+      {
+        color: "#d59563",
+      },
+    ],
+  },
+  {
+    featureType: "poi.park",
+    elementType: "geometry",
+    stylers: [
+      {
+        color: "#263c3f",
+      },
+    ],
+  },
+  {
+    featureType: "poi.park",
+    elementType: "labels.text.fill",
+    stylers: [
+      {
+        color: "#6b9a76",
+      },
+    ],
+  },
+  {
+    featureType: "road",
+    elementType: "geometry",
+    stylers: [
+      {
+        color: "#38414e",
+      },
+    ],
+  },
+  {
+    featureType: "road",
+    elementType: "geometry.stroke",
+    stylers: [
+      {
+        color: "#212a37",
+      },
+    ],
+  },
+  {
+    featureType: "road",
+    elementType: "labels.text.fill",
+    stylers: [
+      {
+        color: "#9ca5b3",
+      },
+    ],
+  },
+  {
+    featureType: "road.highway",
+    elementType: "geometry",
+    stylers: [
+      {
+        color: "#746855",
+      },
+    ],
+  },
+  {
+    featureType: "road.highway",
+    elementType: "geometry.stroke",
+    stylers: [
+      {
+        color: "#1f2835",
+      },
+    ],
+  },
+  {
+    featureType: "road.highway",
+    elementType: "labels.text.fill",
+    stylers: [
+      {
+        color: "#f3d19c",
+      },
+    ],
+  },
+  {
+    featureType: "transit",
+    elementType: "geometry",
+    stylers: [
+      {
+        color: "#2f3948",
+      },
+    ],
+  },
+  {
+    featureType: "transit.station",
+    elementType: "labels.text.fill",
+    stylers: [
+      {
+        color: "#d59563",
+      },
+    ],
+  },
+  {
+    featureType: "water",
+    elementType: "geometry",
+    stylers: [
+      {
+        color: "#17263c",
+      },
+    ],
+  },
+  {
+    featureType: "water",
+    elementType: "labels.text.fill",
+    stylers: [
+      {
+        color: "#515c6d",
+      },
+    ],
+  },
+  {
+    featureType: "water",
+    elementType: "labels.text.stroke",
+    stylers: [
+      {
+        color: "#17263c",
+      },
+    ],
+  },
+];

@@ -8,6 +8,7 @@ import Animated, {
   useDerivedValue,
 } from "react-native-reanimated";
 import { toRad } from "react-native-redash";
+import { useTheme } from "../../theme/ThemeProvider";
 
 // @ts-ignore
 export const transformOrigin = ({ x, y }, ...transformations) => {
@@ -32,13 +33,18 @@ interface HandleProps extends BottomSheetHandleProps {
  * @param animatedIndex
  */
 const Handle: React.FC<HandleProps> = ({ style, animatedIndex }) => {
+  const { colors } = useTheme();
+
   // Region animations.
   const indicatorTransformOriginY = useDerivedValue(() =>
     interpolate(animatedIndex.value, [0, 1, 2], [-1, 0, 1], Extrapolate.CLAMP)
   );
 
   // Region styles.
-  const containerStyle = useMemo(() => [styles.header, style], [style]);
+  const containerStyle = useMemo(
+    () => [{ ...styles.header, style, backgroundColor: colors.background }],
+    [style]
+  );
   const containerAnimatedStyle = useAnimatedStyle(() => {
     const borderTopRadius = interpolate(
       animatedIndex.value,
@@ -124,10 +130,7 @@ const styles = StyleSheet.create({
     alignContent: "center",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "white",
     paddingVertical: 14,
-    borderBottomWidth: 1,
-    borderBottomColor: "#fff",
   },
   indicator: {
     position: "absolute",

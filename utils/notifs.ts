@@ -21,8 +21,6 @@ export async function schedulePushNotification({
       title: title,
       body: body,
       //data: { data: "goes here" },
-      autoDismiss: true,
-      sticky: false,
     },
     trigger: {},
   });

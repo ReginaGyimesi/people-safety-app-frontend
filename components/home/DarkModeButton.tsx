@@ -1,20 +1,24 @@
 import React from "react";
 import { StyleSheet, TouchableOpacity } from "react-native";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
-import { baseColors } from "../../styles/colors";
+import IonIcons from "react-native-vector-icons/Ionicons";
 import { useTheme } from "../../theme/ThemeProvider";
-
-type Props = {
-  onPress: () => void;
-};
+import { baseColors } from "../../styles/colors";
 
 /**
- * A custom button component to return to current location.
- *
- * @param onPress
+ * A custom button component to change colour mode.
  */
-export default function CurrentLocationButton({ onPress }: Props) {
-  const { colors } = useTheme();
+export default function DarkModeButton() {
+  const { colors, setScheme, isDark } = useTheme();
+
+  const changeTheme = () => {
+    if (isDark) {
+      setScheme("light");
+    } else {
+      setScheme("dark");
+    }
+  };
+
   return (
     <TouchableOpacity
       style={{
@@ -22,13 +26,13 @@ export default function CurrentLocationButton({ onPress }: Props) {
         ...styles.elevation,
         backgroundColor: colors.background,
       }}
-      onPress={onPress}
+      onPress={changeTheme}
     >
-      <MaterialIcons
-        name={"my-location"}
-        color={baseColors.primary}
-        size={26}
-      />
+      {isDark ? (
+        <IonIcons name={"sunny-outline"} color={baseColors.primary} size={26} />
+      ) : (
+        <IonIcons name={"moon-outline"} color={baseColors.primary} size={26} />
+      )}
     </TouchableOpacity>
   );
 }
@@ -40,7 +44,7 @@ const styles = StyleSheet.create({
     height: 50,
     borderRadius: 16,
     right: 15,
-    bottom: "32%",
+    bottom: "41%",
     position: "absolute",
     justifyContent: "center",
     alignItems: "center",

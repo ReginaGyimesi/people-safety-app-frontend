@@ -1,12 +1,13 @@
 import * as Location from "expo-location";
 import React, { createRef, memo, useEffect, useState } from "react";
-import { StyleSheet, View } from "react-native";
+import { Appearance, StyleSheet, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import Loading from "./components/common/Loading";
 import CustomBottomSheet from "./components/home/BottomSheet";
 import SearchBar from "./components/home/SearchBar";
 import Map from "./components/map/Map";
 import { fetchEnglishData, fetchScottishData } from "./utils/api";
+import { ThemeProvider, useTheme } from "./theme/ThemeProvider";
 
 type Props = {
   country?: string | null;
@@ -174,13 +175,9 @@ const App = memo(() => {
 
   useEffect(() => {
     if (enData[0] == "No data found.") {
-      setMessage(
-        "Oops, nothing to see here. 👀 Try searching with a full postcode."
-      );
+      setMessage("Oops, nothing to see here. 👀 We're working on it!");
     } else if (data[0] == "No data found.") {
-      setMessage(
-        "Oops, nothing to see here. 👀 Try searching with a full postcode."
-      );
+      setMessage("Oops, nothing to see here. 👀 We're working on it!");
     }
   }, [enData, data]);
 
@@ -191,36 +188,38 @@ const App = memo(() => {
     return <Loading />;
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <View style={styles.container}>
-        <SearchBar searchLocation={fetchDetailsBasedOnLocation} />
-        <Map
-          mapRef={mapRef}
-          coords={
-            location?.latitude || location?.longitude ? location : myLocation
-          }
-          goToMyLocation={goToLocation}
-          setMyLocation={setMyLocation}
-          address={
-            (!myAddress.street ? "" : `${myAddress?.street}, `) +
-            `${myAddress?.postalCode}, ${myAddress?.city}, ${myAddress?.country}`
-          }
-          setData={setData}
-          setMyAddress={setMyAddress}
-        />
-        <CustomBottomSheet
-          address={
-            address
-              ? address
-              : (!myAddress.street ? "" : `${myAddress?.street}, `) +
-                `${myAddress?.postalCode}, ${myAddress?.city}, ${myAddress?.country}`
-          }
-          data={!isScot ? enData : data}
-          message={message}
-          isLoading={isLoading}
-        />
-      </View>
-    </GestureHandlerRootView>
+    <ThemeProvider>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <View style={styles.container}>
+          <SearchBar searchLocation={fetchDetailsBasedOnLocation} />
+          <Map
+            mapRef={mapRef}
+            coords={
+              location?.latitude || location?.longitude ? location : myLocation
+            }
+            goToMyLocation={goToLocation}
+            setMyLocation={setMyLocation}
+            address={
+              (!myAddress.street ? "" : `${myAddress?.street}, `) +
+              `${myAddress?.postalCode}, ${myAddress?.city}, ${myAddress?.country}`
+            }
+            setData={setData}
+            setMyAddress={setMyAddress}
+          />
+          <CustomBottomSheet
+            address={
+              address
+                ? address
+                : (!myAddress.street ? "" : `${myAddress?.street}, `) +
+                  `${myAddress?.postalCode}, ${myAddress?.city}, ${myAddress?.country}`
+            }
+            data={!isScot ? enData : data}
+            message={message}
+            isLoading={isLoading}
+          />
+        </View>
+      </GestureHandlerRootView>
+    </ThemeProvider>
   );
 });
 
