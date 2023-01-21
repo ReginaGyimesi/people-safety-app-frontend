@@ -41,10 +41,7 @@ const Handle: React.FC<HandleProps> = ({ style, animatedIndex }) => {
   );
 
   // Region styles.
-  const containerStyle = useMemo(
-    () => [{ ...styles.header, style, backgroundColor: colors.background }],
-    [style]
-  );
+  const containerStyle = useMemo(() => [{ ...styles.header, style }], [style]);
   const containerAnimatedStyle = useAnimatedStyle(() => {
     const borderTopRadius = interpolate(
       animatedIndex.value,

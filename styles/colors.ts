@@ -11,6 +11,7 @@ export const baseColors = {
 export const lightColors = {
   background: "white",
   secondaryBackground: "#f2f2f2",
+  placeholder: "lightGray",
   text: "black",
   secondaryText: "rgba(99, 99, 99, 1)",
   icons: "#e68a00",
@@ -22,6 +23,7 @@ export const lightColors = {
 export const darkColors = {
   background: "#5A5A5A",
   secondaryBackground: "#1e1e1e",
+  placeholder: "#dcdcdc",
   text: "#FFFFFF",
   secondaryText: "white",
   icons: "orange",

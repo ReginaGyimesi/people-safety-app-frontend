@@ -23,6 +23,9 @@ export default function SearchBar({ searchLocation }: Props) {
       <View style={styles.input}>
         <GooglePlacesAutocomplete
           placeholder="Search places and postcodes..."
+          textInputProps={{
+            placeholderTextColor: colors.placeholder,
+          }}
           onPress={(_, details) => {
             // 'details' is provided when fetchDetails = true
             searchLocation({
@@ -47,7 +50,7 @@ export default function SearchBar({ searchLocation }: Props) {
               width: "100%",
               paddingLeft: 10,
               paddingRight: 10,
-              backgroundColor: baseColors.white,
+              backgroundColor: colors.background,
               borderRadius: 23,
               alignItems: "center",
               shadowColor: "#000",
@@ -60,12 +63,14 @@ export default function SearchBar({ searchLocation }: Props) {
               shadowRadius: 6.27,
             },
             textInput: {
-              color: "#5d5d5d",
+              color: colors.secondaryText,
               fontSize: 16,
               height: 40,
               paddingTop: 8,
               borderRadius: 23,
+              backgroundColor: colors.background,
             },
+
             predefinedPlacesDescription: {
               color: "#1faadb",
             },
