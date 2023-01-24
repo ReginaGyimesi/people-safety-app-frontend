@@ -1,3 +1,4 @@
+import { LogBox } from "react-native";
 import * as Location from "expo-location";
 import React, { createRef, memo, useEffect, useState } from "react";
 import { Appearance, StyleSheet, View } from "react-native";
@@ -8,6 +9,8 @@ import SearchBar from "./components/home/SearchBar";
 import Map from "./components/map/Map";
 import { fetchEnglishData, fetchScottishData } from "./utils/api";
 import { ThemeProvider, useTheme } from "./theme/ThemeProvider";
+
+LogBox.ignoreAllLogs();
 
 type Props = {
   country?: string | null;
@@ -124,7 +127,8 @@ const App = memo(() => {
           longitude: -0.132913,
         });
         setMyAddress(response[0]);
-        fetchDetailsBasedOnLocation({
+        console.log(response[0].postalCode);
+        await fetchDetailsBasedOnLocation({
           country: response[0].region,
           lat: 51.513955,
           lng: -0.132913,
@@ -181,7 +185,7 @@ const App = memo(() => {
     }
   }, [enData, data]);
 
-  console.log(data);
+  // console.log(data, enData);
 
   // Return loading screen if default or current location and address are not present or data cannot be fetched.
   if (!myLocation && !myAddress && (enData.length == 0 || data.length == 0))
@@ -200,7 +204,7 @@ const App = memo(() => {
             goToMyLocation={goToLocation}
             setMyLocation={setMyLocation}
             address={
-              (!myAddress.street ? "" : `${myAddress?.street}, `) +
+              (!myAddress?.street ? "" : `${myAddress?.street}, `) +
               `${myAddress?.postalCode}, ${myAddress?.city}, ${myAddress?.country}`
             }
             setData={setData}
@@ -210,7 +214,7 @@ const App = memo(() => {
             address={
               address
                 ? address
-                : (!myAddress.street ? "" : `${myAddress?.street}, `) +
+                : (!myAddress?.street ? "" : `${myAddress?.street}, `) +
                   `${myAddress?.postalCode}, ${myAddress?.city}, ${myAddress?.country}`
             }
             data={!isScot ? enData : data}

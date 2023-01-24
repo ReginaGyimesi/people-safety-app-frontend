@@ -2,9 +2,8 @@ import { API_BASE_URL } from "@env";
 import * as Location from "expo-location";
 import React, { Dispatch, memo, RefObject, useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
-import MapView, { Marker } from "react-native-maps";
+import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import { API_ENDPOINTS } from "../../routes/routes";
-import { colors } from "../../styles";
 import { useTheme } from "../../theme/ThemeProvider";
 import { schedulePushNotification } from "../../utils/notifs";
 import Notification from "../common/Notification";
@@ -50,6 +49,11 @@ const Map = ({
   // Watch location.
   useEffect(() => {
     async function getLocation() {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+
+      if (status !== "granted") {
+        console.log("location not granted");
+      }
       const loc = await Location.getCurrentPositionAsync({
         accuracy: Location.Accuracy.BestForNavigation,
         timeInterval: 1,
@@ -76,108 +80,75 @@ const Map = ({
   }, []);
 
   useEffect(() => {
-    let interval = setInterval(async () => {
-      console.log("interval");
-      const loc = await Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.BestForNavigation,
-        timeInterval: 1,
-        distanceInterval: 1,
-      });
+    (async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
 
-      // Location longitude and latitude.
-      const { latitude, longitude } = loc.coords;
-
-      // Set coords.
-      coords = { latitude, longitude };
-
-      let response = await Location.reverseGeocodeAsync({
-        latitude,
-        longitude,
-      });
-
-      if (response[0].country == "Scotland") {
-        nextSubregion = response[0].subregion;
-
-        console.log("region", originalSubregion);
-
-        // If next region does not equal starting point.
-        if (nextSubregion != originalSubregion) {
-          originalSubregion = nextSubregion;
-
-          if (response[0].subregion == "Glasgow")
-            response[0].subregion = "Glasgow City";
-
-          await fetch(`${API_BASE_URL}/${API_ENDPOINTS.crimeByLa}`, {
-            method: "POST",
-            headers: {
-              Accept: "application/json",
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              la: nextSubregion,
-            }),
-          })
-            .then((response) => response.json())
-            .then((data) => {
-              console.log("fetching scot data...");
-              setData(data);
-              setMyLocation(coords);
-              setMyAddress(response[0]);
-              schedulePushNotification({
-                title:
-                  (!response[0].street ? "" : `${response[0]?.street}, `) +
-                  `${response[0].postalCode}, ${response[0].city}, ${response[0].country}`,
-                body: `You've entered ${data[0].score} out of 10 or ${data[0].score_category} danger area.`,
-              });
-            })
-            .catch((err) => {
-              console.log(err.message);
-            });
-        }
-      } else if (response[0].country == "England") {
-        nextSubregion = response[0].subregion;
-
-        console.log("region", originalSubregion);
-
-        // If next region does not equal starting point.
-        if (nextSubregion != originalSubregion) {
-          originalSubregion = nextSubregion;
-
-          if (response[0].subregion == "Glasgow")
-            response[0].subregion = "Glasgow City";
-
-          await fetch(`${API_BASE_URL}/${API_ENDPOINTS.crimeByLa}`, {
-            method: "POST",
-            headers: {
-              Accept: "application/json",
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              la: nextSubregion,
-            }),
-          })
-            .then((response) => response.json())
-            .then((data) => {
-              console.log("fetching scot data...");
-              setData(data);
-              setMyLocation(coords);
-              setMyAddress(response[0]);
-              schedulePushNotification({
-                title:
-                  (!response[0].street ? "" : `${response[0]?.street}, `) +
-                  `${response[0].postalCode}, ${response[0].city}, ${response[0].country}`,
-                body: `You've entered ${data[0].score} out of 10 or ${data[0].score_category} danger area.`,
-              });
-            })
-            .catch((err) => {
-              console.log(err.message);
-            });
-        }
+      if (status !== "granted") {
+        console.log("location not granted");
       }
-    }, 10000);
-    return () => {
-      clearInterval(interval);
-    };
+      let interval = setInterval(async () => {
+        const loc = await Location.getCurrentPositionAsync({
+          accuracy: Location.Accuracy.BestForNavigation,
+          timeInterval: 1,
+          distanceInterval: 1,
+        });
+
+        // Location longitude and latitude.
+        const { latitude, longitude } = loc.coords;
+
+        // Set coords.
+        coords = { latitude, longitude };
+
+        let response = await Location.reverseGeocodeAsync({
+          latitude,
+          longitude,
+        });
+
+        nextSubregion = response[0].subregion;
+
+        console.log("region", originalSubregion);
+
+        // If next region does not equal starting point.
+        if (nextSubregion != originalSubregion) {
+          originalSubregion = nextSubregion;
+
+          if (response[0].subregion == "Glasgow")
+            response[0].subregion = "Glasgow City";
+          if (response[0].subregion == "West Dunbartonshire")
+            response[0].subregion = "West Dunbartonshire Council";
+
+          await fetch(`${API_BASE_URL}/${API_ENDPOINTS.crimeByLa}`, {
+            method: "POST",
+            headers: {
+              Accept: "application/json",
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              la: nextSubregion,
+            }),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              console.log("fetching scot data...", data);
+              setData(data);
+              setMyLocation(coords);
+              setMyAddress(response[0]);
+              schedulePushNotification({
+                title:
+                  (!response[0]?.street ? "" : `${response[0]?.street}, `) +
+                  `${response[0]?.postalCode}, ${response[0]?.city}, ${response[0]?.country}`,
+                body: `You've entered ${data[0]?.score} out of 10 or ${data[0]?.score_category} danger area.`,
+              });
+            })
+            .catch((err) => {
+              console.log(err.message);
+            });
+        }
+      }, 10000);
+      return () => {
+        clearInterval(interval);
+      };
+    })();
   }, []);
 
   return (
@@ -196,8 +167,7 @@ const Map = ({
         showsUserLocation={true}
         followsUserLocation={true}
         customMapStyle={isDark ? darkMap : []}
-        //@ts-ignore
-        provider={MapView.PROVIDER_GOOGLE}
+        provider={PROVIDER_GOOGLE}
       >
         <Marker
           coordinate={{
