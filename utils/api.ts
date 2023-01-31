@@ -13,6 +13,7 @@ export const fetchScottishData = async ({
   setLoading,
 }: FetchScottishProps) => {
   setLoading(true);
+
   await fetch(`${API_BASE_URL}/${API_ENDPOINTS.crimeByLa}`, {
     method: "POST",
     headers: {
@@ -34,6 +35,7 @@ export const fetchScottishData = async ({
       console.log(err.message);
       setLoading(false);
     });
+  setLoading(false);
 };
 
 // Fetch English data by postcode.
@@ -63,31 +65,63 @@ export const fetchEnglishData = async ({
       console.log(err.message);
       setLoading(false);
     });
+  setLoading(false);
 };
 
-// Find point in local authority shape.
-export const fetchPointInLa = async ({
-  lat,
-  lon,
+// Fetch Scottish neighbouring areas.
+export const fetchScottishNeighbouringAreas = async ({
+  la,
   setData,
-}: FetchPointInLaProps) => {
-  await fetch(`${API_BASE_URL}/${API_ENDPOINTS.crimeByPo}`, {
+  setLoading,
+}: FetchScottishProps) => {
+  setLoading(true);
+  await fetch(`${API_BASE_URL}/${API_ENDPOINTS.scotNeighbours}`, {
     method: "POST",
     headers: {
       Accept: "application/json",
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      lat: lat,
-      lon: lon,
+      la: la,
     }),
   })
     .then((response) => response.json())
     .then((data) => {
-      console.log("fetching la point...");
+      console.log("fetching neighbouring...");
       setData(data);
+      setLoading(false);
     })
     .catch((err) => {
       console.log(err.message);
+      setLoading(false);
+    });
+};
+
+// Fetch Scottish neighbouring areas.
+export const fetchEnglishNeighbouringAreas = async ({
+  po,
+  setData,
+  setLoading,
+}: FetchEnglishProps) => {
+  setLoading(true);
+  await fetch(`${API_BASE_URL}/${API_ENDPOINTS.enNeighbours}`, {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      po: po,
+    }),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      console.log("fetching neighbouring...");
+      setData(data);
+      setLoading(false);
+    })
+    .catch((err) => {
+      console.log(err.message);
+      setLoading(false);
     });
 };

@@ -7,8 +7,15 @@ import Loading from "./components/common/Loading";
 import CustomBottomSheet from "./components/home/BottomSheet";
 import SearchBar from "./components/home/SearchBar";
 import Map from "./components/map/Map";
-import { fetchEnglishData, fetchScottishData } from "./utils/api";
+import {
+  fetchEnglishData,
+  fetchEnglishNeighbouringAreas,
+  fetchScottishData,
+  fetchScottishNeighbouringAreas,
+} from "./utils/api";
 import { ThemeProvider, useTheme } from "./theme/ThemeProvider";
+import { API_BASE_URL } from "@env";
+import { API_ENDPOINTS } from "./routes/routes";
 
 LogBox.ignoreAllLogs();
 
@@ -32,6 +39,30 @@ const App = memo(() => {
   const [isScot, setScot] = useState(false);
   const [isLoading, setLoading] = useState(false);
   const mapRef = createRef<any>();
+
+  const [scotNeighbours, setScotNeighbours] = useState<any>(null);
+  const [enNeighbours, setEnNeighbours] = useState<any>(null);
+
+  async function onNeighbourClick(id: number) {
+    let response = await Location.reverseGeocodeAsync({
+      latitude: scotNeighbours[0].lat[id],
+      longitude: scotNeighbours[0].lon[id],
+    });
+
+    fetchDetailsBasedOnLocation({
+      country: response[0].region,
+      localAuth: response[0].subregion,
+      lat: scotNeighbours[0].lat[id],
+      lng: scotNeighbours[0].lon[id],
+      details: {
+        formatted_address: `${
+          response[0].streetNumber ? `${response[0].streetNumber} ` : ""
+        }${response[0].street ? `${response[0].street} ` : ""}${
+          response[0].postalCode
+        } ${response[0].subregion}`,
+      },
+    });
+  }
 
   // Fetch details if country is either Scotland or England
   // and navigate to location.
@@ -69,11 +100,21 @@ const App = memo(() => {
         setData: setData,
         setLoading: setLoading,
       });
+      fetchScottishNeighbouringAreas({
+        la: localAuth,
+        setData: setScotNeighbours,
+        setLoading: setLoading,
+      });
     } else if (country == "England") {
       setScot(false);
       fetchEnglishData({
         po: sanitisedPo,
         setData: setEnData,
+        setLoading: setLoading,
+      });
+      fetchEnglishNeighbouringAreas({
+        po: sanitisedPo,
+        setData: setEnNeighbours,
         setLoading: setLoading,
       });
     } else {
@@ -84,6 +125,8 @@ const App = memo(() => {
 
     goToLocation;
   };
+
+  console.log("data", data);
 
   // Navigate to selected location or current location.
   const goToLocation = () => {
@@ -220,6 +263,8 @@ const App = memo(() => {
             data={!isScot ? enData : data}
             message={message}
             isLoading={isLoading}
+            neighbours={isScot ? scotNeighbours : enNeighbours}
+            onNeighbourClick={onNeighbourClick}
           />
         </View>
       </GestureHandlerRootView>
