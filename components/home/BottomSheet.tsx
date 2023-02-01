@@ -19,6 +19,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { useTheme } from "../../theme/ThemeProvider";
 import { TouchableOpacity } from "react-native-gesture-handler";
+import { StackActions, useNavigation } from "@react-navigation/native";
 
 type Props = {
   address: string;
@@ -74,6 +75,7 @@ export default function CustomBottomSheet({
   const { colors } = useTheme();
   // bottom sheet ref
   const bottomSheetRef = useRef<BottomSheet>(null);
+  const navigation = useNavigation();
 
   // bottom sheet snap points
   const snapPoints = useMemo(() => ["30%", "86%"], []);
@@ -94,7 +96,7 @@ export default function CustomBottomSheet({
     <BottomSheet
       ref={bottomSheetRef}
       index={0}
-      snapPoints={message ? snapPointsNone : snapPoints}
+      snapPoints={snapPoints}
       handleComponent={Handle}
       style={{ ...styles.sheet }}
       backgroundComponent={CustomBackground}
@@ -123,63 +125,72 @@ export default function CustomBottomSheet({
           >
             Crime rate in
           </Text>
-          <TouchableOpacity style={[styles.button]}>
-            <Text style={{ color: baseColors.white }}>More</Text>
+          <TouchableOpacity
+            style={[styles.button]}
+            onPress={() => navigation.dispatch(StackActions.push("Stats"))}
+          >
+            <Text style={{ color: baseColors.white }}>More stats</Text>
           </TouchableOpacity>
         </View>
         <Text style={{ ...styles.text, maxWidth: 280 }}>{address}</Text>
       </View>
-      <BottomSheetScrollView>
+      <BottomSheetScrollView bounces={false}>
         {isLoading ? (
           <ActivityIndicator style={{ paddingTop: 10 }} />
         ) : (
           <>
-            <View
-              style={{
-                backgroundColor: "rgba(0, 166, 153, 0.25)",
-                zIndex: -1,
-                marginBottom: 20,
-              }}
-            >
+            {message ? (
+              <>
+                <Text
+                  style={[
+                    styles.body,
+                    styles.bold,
+                    {
+                      color: colors.secondaryText,
+                      paddingLeft: 20,
+                      paddingRight: 20,
+                    },
+                  ]}
+                >
+                  {message}
+                </Text>
+              </>
+            ) : (
               <View
                 style={{
-                  ...styles.section,
-                  backgroundColor: colors.background,
-                  borderLeftWidth: 4,
-                  borderColor: selectColor(data[0]?.score_category),
+                  backgroundColor: "rgba(0, 166, 153, 0.25)",
+                  zIndex: -1,
+                  marginBottom: 20,
                 }}
               >
-                {!message && (
-                  <View
-                    style={{
-                      flex: 1,
-                      flexDirection: "row",
-                    }}
-                  >
+                <View
+                  style={{
+                    ...styles.section,
+                    backgroundColor: colors.background,
+                    borderLeftWidth: 4,
+                    borderColor: selectColor(data[0]?.score_category),
+                  }}
+                >
+                  {!message && (
                     <View
-                      style={[
-                        styles.circle,
-                        {
-                          backgroundColor: selectColor(data[0]?.score_category),
-                        },
-                      ]}
-                    ></View>
-                  </View>
-                )}
-
-                {message ? (
-                  <>
-                    <Text
-                      style={[
-                        styles.body,
-                        styles.bold,
-                        { color: colors.secondaryText },
-                      ]}
+                      style={{
+                        flex: 1,
+                        flexDirection: "row",
+                      }}
                     >
-                      {message}
-                    </Text>
-                  </>
-                ) : (
+                      <View
+                        style={[
+                          styles.circle,
+                          {
+                            backgroundColor: selectColor(
+                              data[0]?.score_category
+                            ),
+                          },
+                        ]}
+                      ></View>
+                    </View>
+                  )}
+
                   <>
                     <Text
                       style={[
@@ -201,88 +212,88 @@ export default function CustomBottomSheet({
                       crime level.
                     </Text>
                   </>
-                )}
-              </View>
-              {!message && (
-                <>
-                  <View
-                    style={{
-                      ...styles.section,
-                      backgroundColor: colors.background,
-                    }}
-                  >
-                    <Text style={[styles.subtitle, { color: colors.text }]}>
-                      Most common crime types
-                    </Text>
+                </View>
+                {!message && (
+                  <>
                     <View
                       style={{
-                        flexDirection: "row",
-                        justifyContent: "space-between",
+                        ...styles.section,
+                        backgroundColor: colors.background,
                       }}
                     >
-                      <View>
-                        {data[0]?.crime_type?.map((c: any, i: any) => (
-                          <Text
-                            key={i}
-                            style={{
-                              ...styles.body,
-                              color: colors.secondaryText,
-                            }}
-                          >
-                            {c}
-                          </Text>
-                        ))}
+                      <Text style={[styles.subtitle, { color: colors.text }]}>
+                        Most common crime types
+                      </Text>
+                      <View
+                        style={{
+                          flexDirection: "row",
+                          justifyContent: "space-between",
+                        }}
+                      >
+                        <View>
+                          {data[0]?.crime_type?.map((c: any, i: any) => (
+                            <Text
+                              key={i}
+                              style={{
+                                ...styles.body,
+                                color: colors.secondaryText,
+                              }}
+                            >
+                              {c}
+                            </Text>
+                          ))}
+                        </View>
+                        <View>
+                          {data[0]?.n?.map((c: any, i: any) => (
+                            <Text
+                              key={i}
+                              style={[
+                                styles.body,
+                                {
+                                  fontWeight: "700",
+                                  color: colors.secondaryText,
+                                },
+                              ]}
+                            >
+                              {c}
+                            </Text>
+                          ))}
+                        </View>
                       </View>
-                      <View>
-                        {data[0]?.n?.map((c: any, i: any) => (
+                    </View>
+                    <View
+                      style={{
+                        ...styles.section,
+                        backgroundColor: colors.background,
+                        borderBottomLeftRadius: 0,
+                      }}
+                    >
+                      <Text style={[styles.subtitle, { color: colors.text }]}>
+                        Neighbouring areas
+                      </Text>
+                      {neighbours &&
+                        neighbours[0]?.neighbour?.map((n: any, i: number) => (
                           <Text
                             key={i}
                             style={[
                               styles.body,
                               {
-                                fontWeight: "700",
-                                color: colors.secondaryText,
+                                fontWeight: "400",
+                                color: baseColors.primary,
+                                textDecorationLine: "underline",
+                                marginTop: 7,
                               },
                             ]}
+                            onPress={() => onNeighbourClick(i)}
                           >
-                            {c}
+                            {n}
                           </Text>
                         ))}
-                      </View>
                     </View>
-                  </View>
-                  <View
-                    style={{
-                      ...styles.section,
-                      backgroundColor: colors.background,
-                      borderBottomLeftRadius: 0,
-                    }}
-                  >
-                    <Text style={[styles.subtitle, { color: colors.text }]}>
-                      Neighbouring areas
-                    </Text>
-                    {neighbours &&
-                      neighbours[0]?.neighbour?.map((n: any, i: number) => (
-                        <Text
-                          key={i}
-                          style={[
-                            styles.body,
-                            {
-                              fontWeight: "400",
-                              color: baseColors.primary,
-                              textDecorationLine: "underline",
-                              marginTop: 7,
-                            },
-                          ]}
-                          onPress={() => onNeighbourClick(i)}
-                        >
-                          {n}
-                        </Text>
-                      ))}
-                  </View>
-                </>
-              )}
-            </View>
+                  </>
+                )}
+              </View>
+            )}
           </>
         )}
       </BottomSheetScrollView>
@@ -339,7 +350,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: baseColors.primary,
     borderRadius: 23,
-    width: 60,
+    width: 100,
     padding: 5,
     backgroundColor: baseColors.primary,
     shadowColor: "#000",

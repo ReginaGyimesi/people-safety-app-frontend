@@ -114,8 +114,6 @@ const Map = ({
 
           if (response[0].subregion == "Glasgow")
             response[0].subregion = "Glasgow City";
-          if (response[0].subregion == "West Dunbartonshire")
-            response[0].subregion = "West Dunbartonshire Council";
 
           await fetch(`${API_BASE_URL}/${API_ENDPOINTS.crimeByLa}`, {
             method: "POST",
@@ -153,7 +151,7 @@ const Map = ({
 
   return (
     <View style={styles.container}>
-      <Notification />
+      {/* <Notification /> */}
       <MapView
         style={styles.map}
         ref={mapRef}
