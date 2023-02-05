@@ -92,8 +92,6 @@ export default function CustomBottomSheet({
     }
   };
 
-  if (!data) return <></>;
-
   return (
     <BottomSheet
       ref={bottomSheetRef}
@@ -137,7 +135,7 @@ export default function CustomBottomSheet({
         <Text style={{ ...styles.text, maxWidth: 280 }}>{address}</Text>
       </View>
       <BottomSheetScrollView bounces={true}>
-        {isLoading ? (
+        {isLoading || !data ? (
           <ActivityIndicator style={{ paddingTop: 10 }} />
         ) : (
           <>

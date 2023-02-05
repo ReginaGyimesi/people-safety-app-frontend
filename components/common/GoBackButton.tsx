@@ -31,5 +31,9 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.34,
     shadowRadius: 6.27,
+    position: "absolute",
+    top: 34,
+    left: 20,
+    zIndex: 99,
   },
 });
