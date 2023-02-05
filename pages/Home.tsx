@@ -1,18 +1,20 @@
 import * as Location from "expo-location";
 import React, { createRef, memo, useEffect, useState } from "react";
 import { LogBox, StyleSheet, View } from "react-native";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
 import Loading from "../components/common/Loading";
 import CustomBottomSheet from "../components/home/BottomSheet";
 import SearchBar from "../components/home/SearchBar";
 import Map from "../components/map/Map";
+import { useAppDispatch, useAppSelector } from "../redux/hooks";
 
 import {
   fetchEnglishData,
-  fetchEnglishNeighbouringAreas,
+  fetchNeighbouringEn,
+} from "../redux/slices/enReducer";
+import {
+  fetchNeighbouringScot,
   fetchScottishData,
-  fetchScottishNeighbouringAreas,
-} from "../utils/api";
+} from "../redux/slices/scotReducer";
 
 LogBox.ignoreAllLogs();
 
@@ -31,26 +33,24 @@ const HomeScreen = memo(() => {
   const [myLocation, setMyLocation] = useState<any>(null);
   const [myAddress, setMyAddress] = useState<any>(null);
   const [message, setMessage] = useState<any>();
-  const [data, setData] = useState<any>([]);
-  const [enData, setEnData] = useState<any>([]);
   const [isScot, setScot] = useState(false);
-  const [isLoading, setLoading] = useState(false);
   const mapRef = createRef<any>();
 
-  const [scotNeighbours, setScotNeighbours] = useState<any>(null);
-  const [enNeighbours, setEnNeighbours] = useState<any>(null);
+  const dispatch = useAppDispatch();
+  const scotData = useAppSelector((s) => s.scotData);
+  const enData = useAppSelector((s) => s.enData);
 
   async function onNeighbourClick(id: number) {
     let response = await Location.reverseGeocodeAsync({
-      latitude: scotNeighbours[0].lat[id],
-      longitude: scotNeighbours[0].lon[id],
+      latitude: scotData.neighbours[0].lat[id],
+      longitude: scotData.neighbours[0].lon[id],
     });
 
     fetchDetailsBasedOnLocation({
       country: response[0].region,
       localAuth: response[0].subregion,
-      lat: scotNeighbours[0].lat[id],
-      lng: scotNeighbours[0].lon[id],
+      lat: scotData.neighbours[0].lat[id],
+      lng: scotData.neighbours[0].lon[id],
       details: {
         formatted_address: `${
           response[0].streetNumber ? `${response[0].streetNumber} ` : ""
@@ -61,15 +61,14 @@ const HomeScreen = memo(() => {
     });
 
     let res = await Location.reverseGeocodeAsync({
-      latitude: enNeighbours[0]?.lat[id],
-      longitude: enNeighbours[0]?.lon[id],
+      latitude: enData.neighbours[0]?.lat[id],
+      longitude: enData.neighbours[0]?.lon[id],
     });
 
-    console.log("res", res);
     fetchDetailsBasedOnLocation({
       country: res[0].region,
-      lat: enNeighbours[0]?.lat[id],
-      lng: enNeighbours[0]?.lon[id],
+      lat: enData.neighbours[0]?.lat[id],
+      lng: enData.neighbours[0]?.lon[id],
       postcode: res[0].postalCode,
       details: {
         formatted_address: `${
@@ -108,31 +107,16 @@ const HomeScreen = memo(() => {
     if (localAuth == "Glasgow") localAuth = "Glasgow City";
     if (localAuth == "East Dunbartonshire Council")
       localAuth = "East Dunbartonshire";
+
     if (country == "Scotland") {
       setScot(true);
-      await fetchScottishData({
-        la: localAuth,
-        setData: setData,
-        setLoading: setLoading,
-      });
+      dispatch(fetchScottishData({ la: localAuth }));
       if (localAuth == "Edinburgh") localAuth = "City of Edinburgh";
-      fetchScottishNeighbouringAreas({
-        la: localAuth,
-        setData: setScotNeighbours,
-        setLoading: setLoading,
-      });
+      dispatch(fetchNeighbouringScot({ la: localAuth }));
     } else if (country == "England") {
       setScot(false);
-      fetchEnglishData({
-        po: sanitisedPo,
-        setData: setEnData,
-        setLoading: setLoading,
-      });
-      fetchEnglishNeighbouringAreas({
-        po: sanitisedPo,
-        setData: setEnNeighbours,
-        setLoading: setLoading,
-      });
+      dispatch(fetchEnglishData({ po: sanitisedPo }));
+      dispatch(fetchNeighbouringEn({ po: sanitisedPo }));
     } else {
       setMessage(
         "Sorry, no data available outside of England and Scotland 😔 We're working on it!"
@@ -184,7 +168,6 @@ const HomeScreen = memo(() => {
           longitude: -0.132913,
         });
         setMyAddress(response[0]);
-        console.log(response[0].postalCode);
         await fetchDetailsBasedOnLocation({
           country: response[0].region,
           lat: 51.513955,
@@ -223,7 +206,7 @@ const HomeScreen = memo(() => {
           "Sorry, no data available outside of England and Scotland 😔"
         );
 
-      if (enData.length == 0 && data.length == 0)
+      if (!enData.data && !scotData.data)
         fetchDetailsBasedOnLocation({
           country: response[0].region,
           lat: loc?.coords.latitude,
@@ -235,15 +218,25 @@ const HomeScreen = memo(() => {
   }, []);
 
   useEffect(() => {
-    if (enData[0] == "No data found for post code." && !isScot) {
-      setMessage("Oops, nothing to see here. 👀 We're working on it!");
-    } else if (data[0] == "No data found for local authority." && isScot) {
-      setMessage("Oops, nothing to see here. 👀 We're working on it!");
+    if (!scotData.data || !enData.data) return;
+    const msg = "Oops, nothing to see here. 👀 We're working on it!";
+    if (
+      enData.data[0] == "No data found for post code." &&
+      !isScot &&
+      !enData.loading
+    ) {
+      setMessage(msg);
+    } else if (
+      scotData.data[0] == "No data found for local authority." &&
+      isScot &&
+      !scotData.loading
+    ) {
+      setMessage(msg);
     }
-  }, [enData, data]);
+  }, [enData, scotData.data]);
 
   // Return loading screen if default or current location and address are not present or data cannot be fetched.
-  if (!myLocation && !myAddress && (enData.length == 0 || data.length == 0))
+  if (!myLocation && !myAddress && (!enData.data || !scotData.data))
     return <Loading />;
 
   return (
@@ -260,7 +253,6 @@ const HomeScreen = memo(() => {
           (!myAddress?.street ? "" : `${myAddress?.street}, `) +
           `${myAddress?.postalCode}, ${myAddress?.city}, ${myAddress?.country}`
         }
-        setData={setData}
         setMyAddress={setMyAddress}
       />
       <CustomBottomSheet
@@ -270,10 +262,10 @@ const HomeScreen = memo(() => {
             : (!myAddress?.street ? "" : `${myAddress?.street}, `) +
               `${myAddress?.postalCode}, ${myAddress?.city}, ${myAddress?.country}`
         }
-        data={!isScot ? enData : data}
+        data={!isScot ? enData.data : scotData.data}
         message={message}
-        isLoading={isLoading}
-        neighbours={isScot ? scotNeighbours : enNeighbours}
+        isLoading={scotData.loading || enData.loading}
+        neighbours={isScot ? scotData.neighbours : enData.neighbours}
         onNeighbourClick={onNeighbourClick}
       />
     </View>

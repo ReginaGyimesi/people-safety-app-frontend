@@ -3,7 +3,10 @@ import * as Location from "expo-location";
 import React, { Dispatch, memo, RefObject, useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
+import { useAppDispatch, useAppSelector } from "../../redux/hooks";
+import { fetchScottishData } from "../../redux/slices/scotReducer";
 import { API_ENDPOINTS } from "../../routes/routes";
+import { darkMap } from "../../styles/darkMap";
 import { useTheme } from "../../theme/ThemeProvider";
 import { schedulePushNotification } from "../../utils/notifs";
 import Notification from "../common/Notification";
@@ -16,7 +19,6 @@ type Props = {
   goToMyLocation: () => void;
   setMyLocation: Dispatch<any>;
   address: any;
-  setData: Dispatch<any>;
   setMyAddress: Dispatch<any>;
 };
 
@@ -27,7 +29,6 @@ type Props = {
  * @param coords
  * @param goToMyLocation
  * @param setMyLocation
- * @param setData
  * @param setMyAddress
  */
 const Map = ({
@@ -35,18 +36,14 @@ const Map = ({
   coords,
   goToMyLocation,
   setMyLocation,
-  setData,
   setMyAddress,
 }: Props) => {
   const { isDark } = useTheme();
   let originalSubregion: string | null;
   let nextSubregion: string | null;
+  const dispatch = useAppDispatch();
 
-  //TODO: implement this so it sends
-  let originalPostcode;
-  let nextPostcode;
-
-  // Watch location.
+  // Watch current location.
   useEffect(() => {
     async function getLocation() {
       let { status } = await Location.requestForegroundPermissionsAsync();
@@ -115,32 +112,18 @@ const Map = ({
           if (response[0].subregion == "Glasgow")
             response[0].subregion = "Glasgow City";
 
-          await fetch(`${API_BASE_URL}/${API_ENDPOINTS.crimeByLa}`, {
-            method: "POST",
-            headers: {
-              Accept: "application/json",
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              la: nextSubregion,
-            }),
-          })
-            .then((response) => response.json())
-            .then((data) => {
-              console.log("fetching scot data...", data);
-              setData(data);
-              setMyLocation(coords);
-              setMyAddress(response[0]);
-              schedulePushNotification({
-                title:
-                  (!response[0]?.street ? "" : `${response[0]?.street}, `) +
-                  `${response[0]?.postalCode}, ${response[0]?.city}, ${response[0]?.country}`,
-                body: `You've entered ${data[0]?.score} out of 10 or ${data[0]?.score_category} danger area.`,
-              });
-            })
-            .catch((err) => {
-              console.log(err.message);
-            });
+          dispatch(fetchScottishData({ la: nextSubregion }));
+
+          setMyLocation(coords);
+          setMyAddress(response[0]);
+          // schedulePushNotification({
+          //   title:
+          //     (!response[0]?.street ? "" : `${response[0]?.street}, `) +
+          //     `${response[0]?.postalCode}, ${response[0]?.city}, ${response[0]?.country}`,
+          //   body: `You've entered ${scotData.data![0]?.score} out of 10 or ${
+          //     scotData.data![0]?.score_category
+          //   } danger area.`,
+          // });
         }
       }, 10000);
       return () => {
@@ -192,165 +175,3 @@ const styles = StyleSheet.create({
     height: "100%",
   },
 });
-
-const darkMap = [
-  {
-    elementType: "geometry",
-    stylers: [
-      {
-        color: "#242f3e",
-      },
-    ],
-  },
-  {
-    elementType: "labels.text.fill",
-    stylers: [
-      {
-        color: "#746855",
-      },
-    ],
-  },
-  {
-    elementType: "labels.text.stroke",
-    stylers: [
-      {
-        color: "#242f3e",
-      },
-    ],
-  },
-  {
-    featureType: "administrative.locality",
-    elementType: "labels.text.fill",
-    stylers: [
-      {
-        color: "#d59563",
-      },
-    ],
-  },
-  {
-    featureType: "poi",
-    elementType: "labels.text.fill",
-    stylers: [
-      {
-        color: "#d59563",
-      },
-    ],
-  },
-  {
-    featureType: "poi.park",
-    elementType: "geometry",
-    stylers: [
-      {
-        color: "#263c3f",
-      },
-    ],
-  },
-  {
-    featureType: "poi.park",
-    elementType: "labels.text.fill",
-    stylers: [
-      {
-        color: "#6b9a76",
-      },
-    ],
-  },
-  {
-    featureType: "road",
-    elementType: "geometry",
-    stylers: [
-      {
-        color: "#38414e",
-      },
-    ],
-  },
-  {
-    featureType: "road",
-    elementType: "geometry.stroke",
-    stylers: [
-      {
-        color: "#212a37",
-      },
-    ],
-  },
-  {
-    featureType: "road",
-    elementType: "labels.text.fill",
-    stylers: [
-      {
-        color: "#9ca5b3",
-      },
-    ],
-  },
-  {
-    featureType: "road.highway",
-    elementType: "geometry",
-    stylers: [
-      {
-        color: "#746855",
-      },
-    ],
-  },
-  {
-    featureType: "road.highway",
-    elementType: "geometry.stroke",
-    stylers: [
-      {
-        color: "#1f2835",
-      },
-    ],
-  },
-  {
-    featureType: "road.highway",
-    elementType: "labels.text.fill",
-    stylers: [
-      {
-        color: "#f3d19c",
-      },
-    ],
-  },
-  {
-    featureType: "transit",
-    elementType: "geometry",
-    stylers: [
-      {
-        color: "#2f3948",
-      },
-    ],
-  },
-  {
-    featureType: "transit.station",
-    elementType: "labels.text.fill",
-    stylers: [
-      {
-        color: "#d59563",
-      },
-    ],
-  },
-  {
-    featureType: "water",
-    elementType: "geometry",
-    stylers: [
-      {
-        color: "#17263c",
-      },
-    ],
-  },
-  {
-    featureType: "water",
-    elementType: "labels.text.fill",
-    stylers: [
-      {
-        color: "#515c6d",
-      },
-    ],
-  },
-  {
-    featureType: "water",
-    elementType: "labels.text.stroke",
-    stylers: [
-      {
-        color: "#17263c",
-      },
-    ],
-  },
-];
