@@ -142,8 +142,6 @@ const HomeScreen = memo(() => {
     goToLocation;
   }
 
-  console.log("data", data);
-
   // Navigate to selected location or current location.
   const goToLocation = () => {
     if (location.latitude && location.longitude) {
@@ -243,8 +241,6 @@ const HomeScreen = memo(() => {
       setMessage("Oops, nothing to see here. 👀 We're working on it!");
     }
   }, [enData, data]);
-
-  console.log(enData, data);
 
   // Return loading screen if default or current location and address are not present or data cannot be fetched.
   if (!myLocation && !myAddress && (enData.length == 0 || data.length == 0))
