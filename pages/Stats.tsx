@@ -16,13 +16,14 @@ const screenWidth = Dimensions.get("window").width;
 export default function StatsScreen() {
   const { colors } = useTheme();
   const scotData = useAppSelector((s) => s.scotData);
+  const enData = useAppSelector((s) => s.enData);
   const [labels, setLabels] = useState<any>([scotData.data![0].area_name]);
   const [values, setValues] = useState<any>([scotData.data![0].total_crime]);
 
   const getData = () => {
     scotData.neighbours[0].neighbour.map(
       async (n: any) =>
-        await fetch(`${API_BASE_URL}/${API_ENDPOINTS.crimeByLa}`, {
+        await fetch(`${API_BASE_URL}${API_ENDPOINTS.crimeByLa}`, {
           method: "POST",
           headers: {
             Accept: "application/json",
@@ -36,6 +37,31 @@ export default function StatsScreen() {
           .then((data) => {
             if (data.length == 0) return;
             setLabels((l: any) => [...l, data[0]?.area_name]);
+            setValues((v: any) => [...v, data[0]?.total_crime]);
+
+            return data;
+          })
+          .catch((err) => {
+            console.log(err.message);
+          })
+    );
+
+    enData.neighbours[0].neighbour.map(
+      async (n: any) =>
+        await fetch(`${API_BASE_URL}en-crime-by-lsoa-name`, {
+          method: "POST",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            po: n,
+          }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.length == 0) return;
+            setLabels((l: any) => [...l, data[0]?.lsoa_name]);
             setValues((v: any) => [...v, data[0]?.total_crime]);
 
             return data;
@@ -110,7 +136,7 @@ export default function StatsScreen() {
         </Text>
         <View
           style={{
-            marginTop: 10,
+            marginTop: 20,
             backgroundColor: colors.secondaryBackground,
             borderRadius: 15,
             overflow: "hidden",

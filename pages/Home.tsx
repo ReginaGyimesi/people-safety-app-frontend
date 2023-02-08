@@ -123,8 +123,8 @@ const HomeScreen = memo(() => {
       localAuth = "West Dunbartonshire Council";
     if (country == "Scotland") {
       setScot(true);
-
       dispatch(fetchScottishData({ la: localAuth }));
+
       if (localAuth == "East Renfrewshire Council")
         localAuth = "East Renfrewshire";
       if (localAuth == "West Dunbartonshire Council")
@@ -136,10 +136,14 @@ const HomeScreen = memo(() => {
       if (localAuth == "Edinburgh") localAuth = "City of Edinburgh";
       dispatch(fetchNeighbouringScot({ la: localAuth }));
     } else if (country == "England") {
-      console.log("hello");
       setScot(false);
+
       dispatch(fetchEnglishData({ po: sanitisedPo }));
-      dispatch(fetchNeighbouringEn({ po: sanitisedPo }));
+      dispatch(fetchNeighbouringEn({ po: enData.data[0].lsoa_code }));
+    } else {
+      setMessage(
+        "Sorry, no data available outside of England and Scotland 😔 We're working on it!"
+      );
     }
 
     goToLocation;
@@ -251,10 +255,6 @@ const HomeScreen = memo(() => {
       !scotData.loading
     ) {
       setMessage(msg);
-    } else {
-      setMessage(
-        "Sorry, no data available outside of England and Scotland 😔 We're working on it!"
-      );
     }
   }, [enData, scotData.data]);
 

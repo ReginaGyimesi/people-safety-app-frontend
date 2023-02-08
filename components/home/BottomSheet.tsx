@@ -125,7 +125,7 @@ export default function CustomBottomSheet({
           >
             Crime rate in
           </Text>
-          {(!message || !isLoading) && (
+          {(!message || !isLoading || data) && (
             <TouchableOpacity
               style={[styles.button]}
               onPress={() => navigation.dispatch(StackActions.push("Stats"))}
@@ -152,142 +152,147 @@ export default function CustomBottomSheet({
             {message}
           </Text>
         )}
-        {isLoading || !data ? (
-          !message && <ActivityIndicator style={{ paddingTop: 10 }} />
-        ) : (
-          <View
-            style={{
-              backgroundColor: "rgba(0, 166, 153, 0.25)",
-              zIndex: -1,
-              marginBottom: 20,
-            }}
-          >
-            <View
-              style={{
-                ...styles.section,
-                backgroundColor: colors.background,
-                borderLeftWidth: 4,
-                borderColor: selectColor(data[0]?.score_category),
-              }}
-            >
-              {!message && (
-                <View
-                  style={{
-                    flex: 1,
-                    flexDirection: "row",
-                  }}
-                >
-                  <View
-                    style={[
-                      styles.circle,
-                      {
-                        backgroundColor: selectColor(data[0]?.score_category),
-                      },
-                    ]}
-                  ></View>
-                </View>
-              )}
-
-              <>
-                <Text
-                  style={[
-                    styles.subtitle,
-                    { marginLeft: 22, color: colors.text, marginTop: -17 },
-                  ]}
-                >
-                  {data[0]?.score_category}
-                </Text>
-                <Text style={{ ...styles.body, color: colors.secondaryText }}>
-                  Annual crime rate in your local area is{" "}
-                  <Text style={{ fontWeight: "bold" }}>
-                    {data[0]?.total_crime}
-                  </Text>{" "}
-                  per 10 000 population. This can be rated as {data[0]?.score}{" "}
-                  out of 10 or {data[0]?.score_category} crime level.
-                </Text>
-              </>
-            </View>
-            {!message && (
-              <>
+        {isLoading || !data
+          ? !message && <ActivityIndicator style={{ paddingTop: 10 }} />
+          : !message && (
+              <View
+                style={{
+                  backgroundColor: "rgba(0, 166, 153, 0.25)",
+                  zIndex: -1,
+                  marginBottom: 20,
+                }}
+              >
                 <View
                   style={{
                     ...styles.section,
                     backgroundColor: colors.background,
+                    borderLeftWidth: 4,
+                    borderColor: selectColor(data[0]?.score_category),
                   }}
                 >
-                  <Text style={[styles.subtitle, { color: colors.text }]}>
-                    Most common crime types
-                  </Text>
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      justifyContent: "space-between",
-                    }}
-                  >
-                    <View>
-                      {data[0]?.crime_type?.map((c: any, i: any) => (
-                        <Text
-                          key={i}
-                          style={{
-                            ...styles.body,
-                            color: colors.secondaryText,
-                          }}
-                        >
-                          {c}
-                        </Text>
-                      ))}
-                    </View>
-                    <View>
-                      {data[0]?.n?.map((c: any, i: any) => (
-                        <Text
-                          key={i}
-                          style={[
-                            styles.body,
-                            {
-                              fontWeight: "700",
-                              color: colors.secondaryText,
-                            },
-                          ]}
-                        >
-                          {c}
-                        </Text>
-                      ))}
-                    </View>
-                  </View>
-                </View>
-                <View
-                  style={{
-                    ...styles.section,
-                    backgroundColor: colors.background,
-                    borderBottomLeftRadius: 0,
-                  }}
-                >
-                  <Text style={[styles.subtitle, { color: colors.text }]}>
-                    Neighbouring areas
-                  </Text>
-                  {neighbours &&
-                    neighbours[0]?.neighbour?.map((n: any, i: number) => (
-                      <Text
-                        key={i}
+                  {!message && (
+                    <View
+                      style={{
+                        flex: 1,
+                        flexDirection: "row",
+                      }}
+                    >
+                      <View
                         style={[
-                          styles.body,
+                          styles.circle,
                           {
-                            fontWeight: "400",
-                            color: baseColors.primary,
-                            textDecorationLine: "underline",
-                            marginTop: 7,
+                            backgroundColor: selectColor(
+                              data[0]?.score_category
+                            ),
                           },
                         ]}
-                        onPress={() => onNeighbourClick(i)}
-                      >
-                        {n}
-                      </Text>
-                    ))}
+                      ></View>
+                    </View>
+                  )}
+
+                  <>
+                    <Text
+                      style={[
+                        styles.subtitle,
+                        { marginLeft: 22, color: colors.text, marginTop: -17 },
+                      ]}
+                    >
+                      {data[0]?.score_category}
+                    </Text>
+                    <Text
+                      style={{ ...styles.body, color: colors.secondaryText }}
+                    >
+                      Annual crime rate in your local area is{" "}
+                      <Text style={{ fontWeight: "bold" }}>
+                        {data[0]?.total_crime}
+                      </Text>{" "}
+                      per 10 000 population. This can be rated as{" "}
+                      {data[0]?.score} out of 10 or {data[0]?.score_category}{" "}
+                      crime level.
+                    </Text>
+                  </>
                 </View>
-              </>
+                {!message && (
+                  <>
+                    <View
+                      style={{
+                        ...styles.section,
+                        backgroundColor: colors.background,
+                      }}
+                    >
+                      <Text style={[styles.subtitle, { color: colors.text }]}>
+                        Most common crime types
+                      </Text>
+                      <View
+                        style={{
+                          flexDirection: "row",
+                          justifyContent: "space-between",
+                        }}
+                      >
+                        <View>
+                          {data[0]?.crime_type?.map((c: any, i: any) => (
+                            <Text
+                              key={i}
+                              style={{
+                                ...styles.body,
+                                color: colors.secondaryText,
+                              }}
+                            >
+                              {c}
+                            </Text>
+                          ))}
+                        </View>
+                        <View>
+                          {data[0]?.n?.map((c: any, i: any) => (
+                            <Text
+                              key={i}
+                              style={[
+                                styles.body,
+                                {
+                                  fontWeight: "700",
+                                  color: colors.secondaryText,
+                                },
+                              ]}
+                            >
+                              {c}
+                            </Text>
+                          ))}
+                        </View>
+                      </View>
+                    </View>
+                    <View
+                      style={{
+                        ...styles.section,
+                        backgroundColor: colors.background,
+                        borderBottomLeftRadius: 0,
+                      }}
+                    >
+                      <Text style={[styles.subtitle, { color: colors.text }]}>
+                        Neighbouring areas
+                      </Text>
+                      {neighbours &&
+                        neighbours[0]?.neighbour?.map((n: any, i: number) => (
+                          <Text
+                            key={i}
+                            style={[
+                              styles.body,
+                              {
+                                fontWeight: "400",
+                                color: baseColors.primary,
+                                textDecorationLine: "underline",
+                                marginTop: 7,
+                              },
+                            ]}
+                            onPress={() => onNeighbourClick(i)}
+                          >
+                            {n}
+                          </Text>
+                        ))}
+                    </View>
+                  </>
+                )}
+              </View>
             )}
-          </View>
-        )}
       </BottomSheetScrollView>
     </BottomSheet>
   );

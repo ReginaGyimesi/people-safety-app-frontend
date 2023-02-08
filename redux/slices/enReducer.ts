@@ -7,7 +7,7 @@ export const fetchEnglishData = createAsyncThunk(
   "fetchEnglishData",
   async ({ po }: { po: string | null | undefined }, thunkAPI) => {
     try {
-      const res = await fetch(`${API_BASE_URL}/${API_ENDPOINTS.crimeByPo}`, {
+      const res = await fetch(`${API_BASE_URL}${API_ENDPOINTS.crimeByPo}`, {
         method: "POST",
         headers: {
           Accept: "application/json",
@@ -33,7 +33,7 @@ export const fetchNeighbouringEn = createAsyncThunk(
   "fetchNeighbouringEn",
   async ({ po }: { po: string | null | undefined }, thunkAPI) => {
     try {
-      const res = await fetch(`${API_BASE_URL}/${API_ENDPOINTS.enNeighbours}`, {
+      const res = await fetch(`${API_BASE_URL}${API_ENDPOINTS.enNeighbours}`, {
         method: "POST",
         headers: {
           Accept: "application/json",
