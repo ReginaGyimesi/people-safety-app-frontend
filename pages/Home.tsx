@@ -46,6 +46,7 @@ const HomeScreen = memo(() => {
       longitude: scotData.neighbours[0].lon[id],
     });
 
+    console.log(response[0].subregion);
     fetchDetailsBasedOnLocation({
       country: response[0].region,
       localAuth: response[0].subregion,
@@ -100,27 +101,45 @@ const HomeScreen = memo(() => {
     setAddress(details?.formatted_address);
     setMessage(null);
 
+    console.log(sanitisedPo);
     console.log("country", country);
     console.log("local auth", localAuth);
 
-    // FIXME: location names might differ from stored names
+    // Location names might differ from stored names.
+    if (localAuth == "East Renfrewshire")
+      localAuth = "East Renfrewshire Council";
+    if (localAuth == "North Ayrshire Council") localAuth = "North Ayrshire";
+    if (localAuth == "East Lothian Council") localAuth = "East Lothian";
+    if (localAuth == "Na h-Eileanan an Iar") localAuth = "Na h-Eileanan Siar";
+    if (localAuth == "Orkney") localAuth = "Orkney Islands";
+    if (localAuth == "Dundee") localAuth = "Dundee City Council";
+    if (localAuth == "Aberdeen") localAuth = "Aberdeen City";
     if (localAuth == "Glasgow") localAuth = "Glasgow City";
     if (localAuth == "East Dunbartonshire Council")
       localAuth = "East Dunbartonshire";
-
+    if (localAuth == "Perth") localAuth = "Perth and Kinross";
+    if (localAuth == "Highland") localAuth = "Highland Council";
+    if (localAuth == "West Dunbartonshire")
+      localAuth = "West Dunbartonshire Council";
     if (country == "Scotland") {
       setScot(true);
+
       dispatch(fetchScottishData({ la: localAuth }));
+      if (localAuth == "East Renfrewshire Council")
+        localAuth = "East Renfrewshire";
+      if (localAuth == "West Dunbartonshire Council")
+        localAuth = "West Dunbartonshire";
+      if (localAuth == "East Renfrewshire Council")
+        localAuth = "East Renfrewshire";
+      if (localAuth == "Highland Council") localAuth = "Highland";
+      if (localAuth == "Dundee City Council") localAuth = "Dundee City";
       if (localAuth == "Edinburgh") localAuth = "City of Edinburgh";
       dispatch(fetchNeighbouringScot({ la: localAuth }));
     } else if (country == "England") {
+      console.log("hello");
       setScot(false);
       dispatch(fetchEnglishData({ po: sanitisedPo }));
       dispatch(fetchNeighbouringEn({ po: sanitisedPo }));
-    } else {
-      setMessage(
-        "Sorry, no data available outside of England and Scotland 😔 We're working on it!"
-      );
     }
 
     goToLocation;
@@ -158,20 +177,20 @@ const HomeScreen = memo(() => {
       if (status !== "granted") {
         // London is default location if location sharing is not allowed.
         setMyLocation({
-          latitude: 51.513955,
-          longitude: -0.132913,
+          latitude: 55.8621,
+          longitude: -4.2424,
         });
 
         // Get location details from longitude and latitude.
         let response = await Location.reverseGeocodeAsync({
-          latitude: 51.513955,
-          longitude: -0.132913,
+          latitude: 55.8621,
+          longitude: -4.2424,
         });
         setMyAddress(response[0]);
         await fetchDetailsBasedOnLocation({
           country: response[0].region,
-          lat: 51.513955,
-          lng: -0.132913,
+          lat: 55.8621,
+          lng: -4.2424,
           postcode: response[0].postalCode,
           localAuth: response[0].subregion,
         });
@@ -218,8 +237,8 @@ const HomeScreen = memo(() => {
   }, []);
 
   useEffect(() => {
-    if (!scotData.data || !enData.data) return;
     const msg = "Oops, nothing to see here. 👀 We're working on it!";
+    if (!scotData.data || !enData.data) return;
     if (
       enData.data[0] == "No data found for post code." &&
       !isScot &&
@@ -232,14 +251,17 @@ const HomeScreen = memo(() => {
       !scotData.loading
     ) {
       setMessage(msg);
+    } else {
+      setMessage(
+        "Sorry, no data available outside of England and Scotland 😔 We're working on it!"
+      );
     }
   }, [enData, scotData.data]);
 
-  console.log(enData);
+  console.log(enData, scotData);
 
   // Return loading screen if default or current location and address are not present or data cannot be fetched.
-  if (!myLocation && !myAddress && (!enData.data || !scotData.data))
-    return <Loading />;
+  if (!myLocation || !myAddress) return <Loading />;
 
   return (
     <View style={styles.container}>

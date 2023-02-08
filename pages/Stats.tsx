@@ -1,12 +1,11 @@
 import { API_BASE_URL } from "@env";
 import React, { useEffect, useState } from "react";
 import { Dimensions, StyleSheet, Text, View } from "react-native";
-import { BarChart, LineChart, PieChart } from "react-native-chart-kit";
+import { BarChart, LineChart } from "react-native-chart-kit";
 import { ScrollView } from "react-native-gesture-handler";
 import GoBackButton from "../components/common/GoBackButton";
 import Loading from "../components/common/Loading";
-import { useAppDispatch, useAppSelector } from "../redux/hooks";
-import { fetchScottishData } from "../redux/slices/scotReducer";
+import { useAppSelector } from "../redux/hooks";
 import { API_ENDPOINTS } from "../routes/routes";
 import { sizes } from "../styles";
 import { baseColors } from "../styles/colors";

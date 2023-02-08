@@ -7,7 +7,7 @@ export const fetchScottishData = createAsyncThunk(
   "fetchScottishData",
   async ({ la }: { la: string | null | undefined }, thunkAPI) => {
     try {
-      const res = await fetch(`${API_BASE_URL}/${API_ENDPOINTS.crimeByLa}`, {
+      const res = await fetch(`${API_BASE_URL}${API_ENDPOINTS.crimeByLa}`, {
         method: "POST",
         headers: {
           Accept: "application/json",
@@ -34,7 +34,7 @@ export const fetchNeighbouringScot = createAsyncThunk(
   async ({ la }: { la: string | null | undefined }, thunkAPI) => {
     try {
       const res = await fetch(
-        `${API_BASE_URL}/${API_ENDPOINTS.scotNeighbours}`,
+        `${API_BASE_URL}${API_ENDPOINTS.scotNeighbours}`,
         {
           method: "POST",
           headers: {
@@ -58,13 +58,15 @@ export const fetchNeighbouringScot = createAsyncThunk(
   }
 );
 
+const initialState: { data: any; neighbours: any; loading: boolean } = {
+  data: null,
+  neighbours: null,
+  loading: false,
+};
+
 const scotReducer = createSlice({
   name: "scot",
-  initialState: {
-    data: null,
-    neighbours: null,
-    loading: false,
-  },
+  initialState: initialState,
   reducers: {},
   extraReducers: (builder) => {
     builder.addCase(fetchScottishData.pending, (state) => {

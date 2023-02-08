@@ -40,7 +40,7 @@ export const fetchNeighbouringEn = createAsyncThunk(
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          po: po,
+          code: po,
         }),
       });
 
@@ -55,13 +55,15 @@ export const fetchNeighbouringEn = createAsyncThunk(
   }
 );
 
+const initialState: { data: any; neighbours: any; loading: boolean } = {
+  data: null,
+  neighbours: null,
+  loading: false,
+};
+
 const enReducer = createSlice({
   name: "en",
-  initialState: {
-    data: null,
-    neighbours: null,
-    loading: false,
-  },
+  initialState: initialState,
   reducers: {},
   extraReducers: (builder) => {
     builder.addCase(fetchEnglishData.pending, (state) => {
