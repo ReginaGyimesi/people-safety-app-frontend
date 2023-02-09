@@ -5,6 +5,7 @@ import { BarChart, LineChart } from "react-native-chart-kit";
 import { ScrollView } from "react-native-gesture-handler";
 import GoBackButton from "../components/common/GoBackButton";
 import Loading from "../components/common/Loading";
+import { ScotContext } from "../context/provider";
 import { useAppSelector } from "../redux/hooks";
 import { API_ENDPOINTS } from "../routes/routes";
 import { sizes } from "../styles";
@@ -17,59 +18,74 @@ export default function StatsScreen() {
   const { colors } = useTheme();
   const scotData = useAppSelector((s) => s.scotData);
   const enData = useAppSelector((s) => s.enData);
-  const [labels, setLabels] = useState<any>([scotData.data![0].area_name]);
-  const [values, setValues] = useState<any>([scotData.data![0].total_crime]);
+  const [labelsScot, setLabelsScot] = useState<any>([
+    scotData.data![0].area_name,
+  ]);
+  const [valuesScot, setValuesScot] = useState<any>([
+    scotData.data![0].total_crime,
+  ]);
+
+  const [labelsEn, setLabelsEn] = useState<any>([enData.data![0].lsoa_code]);
+  const [valuesEn, setValuesEn] = useState<any>([enData.data![0].total_crime]);
+
+  const isScot = React.useContext(ScotContext);
 
   const getData = () => {
-    scotData.neighbours[0].neighbour.map(
-      async (n: any) =>
-        await fetch(`${API_BASE_URL}${API_ENDPOINTS.crimeByLa}`, {
-          method: "POST",
-          headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            la: n,
-          }),
-        })
-          .then((response) => response.json())
-          .then((data) => {
-            if (data.length == 0) return;
-            setLabels((l: any) => [...l, data[0]?.area_name]);
-            setValues((v: any) => [...v, data[0]?.total_crime]);
+    if (isScot) {
+      scotData.neighbours[0].neighbour.map(
+        async (n: any) =>
+          await fetch(`${API_BASE_URL}${API_ENDPOINTS.crimeByLa}`, {
+            method: "POST",
+            headers: {
+              Accept: "application/json",
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              la: n,
+            }),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.length == 0) return;
+              setLabelsScot((l: any) => [...l, data[0]?.area_name]);
+              setValuesScot((v: any) => [...v, data[0]?.total_crime]);
 
-            return data;
-          })
-          .catch((err) => {
-            console.log(err.message);
-          })
-    );
+              return data;
+            })
+            .catch((err) => {
+              console.log(err.message);
+            })
+      );
+    }
+    if (!isScot) {
+      if (enData.neighbours) {
+        enData.neighbours[0].neighbour.map(
+          async (n: any) =>
+            await fetch(`${API_BASE_URL}en-crime-by-lsoa-name`, {
+              method: "POST",
+              headers: {
+                Accept: "application/json",
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                name: n,
+              }),
+            })
+              .then((response) => response.json())
+              .then((data) => {
+                if (data.length == 0) return;
+                if (data[0] == "No data found for post code") return;
+                setLabelsEn((l: any) => [...l, data[0]?.lsoa_code]);
+                setValuesEn((v: any) => [...v, data[0]?.total_crime]);
 
-    enData.neighbours[0].neighbour.map(
-      async (n: any) =>
-        await fetch(`${API_BASE_URL}en-crime-by-lsoa-name`, {
-          method: "POST",
-          headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            po: n,
-          }),
-        })
-          .then((response) => response.json())
-          .then((data) => {
-            if (data.length == 0) return;
-            setLabels((l: any) => [...l, data[0]?.lsoa_name]);
-            setValues((v: any) => [...v, data[0]?.total_crime]);
-
-            return data;
-          })
-          .catch((err) => {
-            console.log(err.message);
-          })
-    );
+                return data;
+              })
+              .catch((err) => {
+                console.log(err.message);
+              })
+        );
+      }
+    }
   };
 
   const chartConfig = {
@@ -94,11 +110,12 @@ export default function StatsScreen() {
       zIndex: 99,
     },
   };
+
   const data = {
-    labels: labels,
+    labels: isScot ? labelsScot : labelsEn,
     datasets: [
       {
-        data: values,
+        data: isScot ? valuesScot : valuesEn,
       },
     ],
   };
@@ -107,7 +124,13 @@ export default function StatsScreen() {
     getData();
   }, []);
 
-  if (values.length < 0 || labels.length < 0) return <Loading />;
+  if (
+    valuesScot.length < 0 ||
+    labelsScot.length < 0 ||
+    valuesEn.length < 0 ||
+    labelsEn.length < 0
+  )
+    return <Loading />;
 
   return (
     <View>
@@ -132,7 +155,8 @@ export default function StatsScreen() {
             marginTop: 50,
           }}
         >
-          Most commonly committed crimes in {scotData.data![0].area_name}
+          Most commonly committed crimes in{" "}
+          {isScot ? scotData.data![0].area_name : enData.data![0].lsoa_name}
         </Text>
         <View
           style={{
@@ -144,13 +168,21 @@ export default function StatsScreen() {
         >
           <LineChart
             data={{
-              labels: scotData.data![0].crime_type,
+              labels: isScot
+                ? scotData.data![0].crime_type
+                : enData.data![0].crime_type,
               datasets: [
-                {
-                  data: scotData.data![0].n,
-                  color: (opacity = 1) => `rgba(134, 65, 244, ${opacity})`, // optional
-                  strokeWidth: 2, // optional
-                },
+                isScot
+                  ? {
+                      data: scotData.data![0].n,
+                      color: (opacity = 1) => `rgba(134, 65, 244, ${opacity})`, // optional
+                      strokeWidth: 2, // optional
+                    }
+                  : {
+                      data: enData.data![0].n,
+                      color: (opacity = 1) => `rgba(134, 65, 244, ${opacity})`, // optional
+                      strokeWidth: 2, // optional
+                    },
               ],
             }}
             width={screenWidth - 30}
@@ -166,7 +198,8 @@ export default function StatsScreen() {
             marginTop: 50,
           }}
         >
-          Total crimes surrounding {scotData.data![0].area_name}
+          Total crimes surrounding{" "}
+          {isScot ? scotData.data![0].area_name : enData.data![0].lsoa_name}
         </Text>
         <View
           style={{

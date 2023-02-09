@@ -5,6 +5,7 @@ import Loading from "../components/common/Loading";
 import CustomBottomSheet from "../components/home/BottomSheet";
 import SearchBar from "../components/home/SearchBar";
 import Map from "../components/map/Map";
+import { ScotContext, ScotDispatchContext } from "../context/provider";
 import { useAppDispatch, useAppSelector } from "../redux/hooks";
 
 import {
@@ -33,52 +34,56 @@ const HomeScreen = memo(() => {
   const [myLocation, setMyLocation] = useState<any>(null);
   const [myAddress, setMyAddress] = useState<any>(null);
   const [message, setMessage] = useState<any>();
-  const [isScot, setScot] = useState(false);
   const mapRef = createRef<any>();
 
   const dispatch = useAppDispatch();
   const scotData = useAppSelector((s) => s.scotData);
   const enData = useAppSelector((s) => s.enData);
 
+  const isScot = React.useContext(ScotContext);
+  const setScot = React.useContext(ScotDispatchContext);
+
   async function onNeighbourClick(id: number) {
-    let response = await Location.reverseGeocodeAsync({
-      latitude: scotData.neighbours[0].lat[id],
-      longitude: scotData.neighbours[0].lon[id],
-    });
+    if (isScot) {
+      let response = await Location.reverseGeocodeAsync({
+        latitude: scotData.neighbours[0].lat[id],
+        longitude: scotData.neighbours[0].lon[id],
+      });
 
-    console.log(response[0].subregion);
-    fetchDetailsBasedOnLocation({
-      country: response[0].region,
-      localAuth: response[0].subregion,
-      lat: scotData.neighbours[0].lat[id],
-      lng: scotData.neighbours[0].lon[id],
-      details: {
-        formatted_address: `${
-          response[0].streetNumber ? `${response[0].streetNumber} ` : ""
-        }${response[0].street ? `${response[0].street} ` : ""}${
-          response[0].postalCode
-        } ${response[0].subregion}`,
-      },
-    });
+      fetchDetailsBasedOnLocation({
+        country: response[0].region,
+        localAuth: response[0].subregion,
+        lat: scotData.neighbours[0].lat[id],
+        lng: scotData.neighbours[0].lon[id],
+        details: {
+          formatted_address: `${
+            response[0].streetNumber ? `${response[0].streetNumber} ` : ""
+          }${response[0].street ? `${response[0].street} ` : ""}${
+            response[0].postalCode
+          } ${response[0].subregion}`,
+        },
+      });
+    }
+    if (!isScot) {
+      let res = await Location.reverseGeocodeAsync({
+        latitude: enData.neighbours[0]?.lat[id],
+        longitude: enData.neighbours[0]?.lon[id],
+      });
 
-    let res = await Location.reverseGeocodeAsync({
-      latitude: enData.neighbours[0]?.lat[id],
-      longitude: enData.neighbours[0]?.lon[id],
-    });
-
-    fetchDetailsBasedOnLocation({
-      country: res[0].region,
-      lat: enData.neighbours[0]?.lat[id],
-      lng: enData.neighbours[0]?.lon[id],
-      postcode: res[0].postalCode,
-      details: {
-        formatted_address: `${
-          res[0].streetNumber ? `${res[0].streetNumber} ` : ""
-        }${res[0].street ? `${res[0].street} ` : ""}${res[0].postalCode} ${
-          res[0].subregion
-        }`,
-      },
-    });
+      fetchDetailsBasedOnLocation({
+        country: res[0].region,
+        lat: enData.neighbours[0]?.lat[id],
+        lng: enData.neighbours[0]?.lon[id],
+        postcode: res[0].postalCode,
+        details: {
+          formatted_address: `${
+            res[0].streetNumber ? `${res[0].streetNumber} ` : ""
+          }${res[0].street ? `${res[0].street} ` : ""}${res[0].postalCode} ${
+            res[0].subregion
+          }`,
+        },
+      });
+    }
   }
 
   // Fetch details if country is either Scotland or England
@@ -101,7 +106,6 @@ const HomeScreen = memo(() => {
     setAddress(details?.formatted_address);
     setMessage(null);
 
-    console.log(sanitisedPo);
     console.log("country", country);
     console.log("local auth", localAuth);
 
@@ -258,7 +262,7 @@ const HomeScreen = memo(() => {
     }
   }, [enData, scotData.data]);
 
-  console.log(enData, scotData);
+  // console.log(enData, scotData);
 
   // Return loading screen if default or current location and address are not present or data cannot be fetched.
   if (!myLocation || !myAddress) return <Loading />;
