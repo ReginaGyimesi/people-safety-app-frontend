@@ -106,7 +106,7 @@ export default function CustomBottomSheet({
           paddingRight: 20,
           paddingLeft: 20,
           borderBottomLeftRadius: 23,
-          paddingBottom: 30,
+          paddingBottom: 20,
         }}
       >
         <View
@@ -125,18 +125,10 @@ export default function CustomBottomSheet({
           >
             Crime rate in
           </Text>
-          {!message && data && data.length > 0 && (
-            <TouchableOpacity
-              style={[styles.button]}
-              onPress={() => navigation.dispatch(StackActions.push("Stats"))}
-            >
-              <Text style={{ color: baseColors.white }}>More stats</Text>
-            </TouchableOpacity>
-          )}
         </View>
         <Text style={{ ...styles.text, maxWidth: 280 }}>{address}</Text>
       </View>
-      <BottomSheetScrollView bounces={true}>
+      <BottomSheetScrollView>
         {message && (
           <Text
             style={[
@@ -191,14 +183,42 @@ export default function CustomBottomSheet({
                   )}
 
                   <>
-                    <Text
-                      style={[
-                        styles.subtitle,
-                        { marginLeft: 22, color: colors.text, marginTop: -17 },
-                      ]}
+                    <View
+                      style={{
+                        flex: 1,
+                        flexDirection: "row",
+                        marginTop: -17,
+                      }}
                     >
-                      {data[0]?.score_category}
-                    </Text>
+                      <Text
+                        style={[
+                          styles.subtitle,
+                          {
+                            marginLeft: 22,
+                            color: colors.text,
+                          },
+                        ]}
+                      >
+                        {data[0]?.score_category}
+                      </Text>
+                      {!message && data && data.length > 0 && (
+                        <TouchableOpacity
+                          style={[styles.button]}
+                          onPress={() =>
+                            navigation.dispatch(StackActions.push("Stats"))
+                          }
+                        >
+                          <Text
+                            style={{
+                              color: baseColors.white,
+                              fontSize: sizes.XS12,
+                            }}
+                          >
+                            See more
+                          </Text>
+                        </TouchableOpacity>
+                      )}
+                    </View>
                     <Text
                       style={{ ...styles.body, color: colors.secondaryText }}
                     >
@@ -220,9 +240,33 @@ export default function CustomBottomSheet({
                         backgroundColor: colors.background,
                       }}
                     >
-                      <Text style={[styles.subtitle, { color: colors.text }]}>
-                        Most common crime types
-                      </Text>
+                      <View
+                        style={{
+                          flex: 1,
+                          flexDirection: "row",
+                        }}
+                      >
+                        <Text style={[styles.subtitle, { color: colors.text }]}>
+                          Most common crime types
+                        </Text>
+                        {!message && data && data.length > 0 && (
+                          <TouchableOpacity
+                            style={[styles.button]}
+                            onPress={() =>
+                              navigation.dispatch(StackActions.push("Stats"))
+                            }
+                          >
+                            <Text
+                              style={{
+                                color: baseColors.white,
+                                fontSize: sizes.XS12,
+                              }}
+                            >
+                              See more
+                            </Text>
+                          </TouchableOpacity>
+                        )}
+                      </View>
                       <View
                         style={{
                           flexDirection: "row",
@@ -230,20 +274,22 @@ export default function CustomBottomSheet({
                         }}
                       >
                         <View>
-                          {data[0]?.crime_type?.map((c: any, i: any) => (
-                            <Text
-                              key={i}
-                              style={{
-                                ...styles.body,
-                                color: colors.secondaryText,
-                              }}
-                            >
-                              {c}
-                            </Text>
-                          ))}
+                          {data[0]?.crime_type
+                            ?.slice(0, 3)
+                            .map((c: any, i: any) => (
+                              <Text
+                                key={i}
+                                style={{
+                                  ...styles.body,
+                                  color: colors.secondaryText,
+                                }}
+                              >
+                                {c}
+                              </Text>
+                            ))}
                         </View>
                         <View>
-                          {data[0]?.n?.map((c: any, i: any) => (
+                          {data[0]?.n?.slice(0, 3).map((c: any, i: any) => (
                             <Text
                               key={i}
                               style={[
@@ -347,16 +393,19 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: baseColors.primary,
     borderRadius: 23,
-    width: 100,
-    padding: 5,
+    width: 80,
+
+    padding: 2,
     backgroundColor: baseColors.primary,
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
-      height: 5,
+      height: 2,
     },
     shadowOpacity: 0.34,
     shadowRadius: 6.27,
+    marginLeft: 10,
+    zIndex: 99,
   },
   section: {
     backgroundColor: "white",
