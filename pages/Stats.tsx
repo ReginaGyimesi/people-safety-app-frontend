@@ -6,7 +6,8 @@ import { ScrollView } from "react-native-gesture-handler";
 import GoBackButton from "../components/common/GoBackButton";
 import Loading from "../components/common/Loading";
 import { ScotContext } from "../context/provider";
-import { useAppSelector } from "../redux/hooks";
+import { useAppDispatch, useAppSelector } from "../redux/hooks";
+import { fetchAllScottishData } from "../redux/slices/scotReducer";
 import { API_ENDPOINTS } from "../routes/routes";
 import { sizes } from "../styles";
 import { baseColors } from "../styles/colors";
@@ -16,17 +17,22 @@ const screenWidth = Dimensions.get("window").width;
 
 export default function StatsScreen() {
   const { colors } = useTheme();
+  const dispatch = useAppDispatch();
   const scotData = useAppSelector((s) => s.scotData);
   const enData = useAppSelector((s) => s.enData);
   const [labelsScot, setLabelsScot] = useState<any>([
-    scotData.data![0].area_name,
+    scotData && scotData.data![0].area_name,
   ]);
   const [valuesScot, setValuesScot] = useState<any>([
-    scotData.data![0].total_crime,
+    scotData && scotData.data![0].total_crime,
   ]);
 
-  const [labelsEn, setLabelsEn] = useState<any>([enData.data![0].lsoa_code]);
-  const [valuesEn, setValuesEn] = useState<any>([enData.data![0].total_crime]);
+  const [labelsEn, setLabelsEn] = useState<any>([
+    enData ?? enData.data![0].lsoa_code,
+  ]);
+  const [valuesEn, setValuesEn] = useState<any>([
+    enData ?? enData.data![0].total_crime,
+  ]);
 
   const isScot = React.useContext(ScotContext);
 
@@ -122,13 +128,15 @@ export default function StatsScreen() {
 
   useEffect(() => {
     getData();
+    dispatch(fetchAllScottishData({ la: scotData.data![0].area_name }));
   }, []);
 
   if (
     valuesScot.length < 0 ||
     labelsScot.length < 0 ||
     valuesEn.length < 0 ||
-    labelsEn.length < 0
+    labelsEn.length < 0 ||
+    (isScot && !scotData.allScots)
   )
     return <Loading />;
 
@@ -148,25 +156,102 @@ export default function StatsScreen() {
             Stats
           </Text>
         </View>
+        {scotData.allScots && (
+          <View>
+            <Text
+              style={{
+                ...styles.subtitle,
+                color: colors.text,
+                marginTop: 50,
+              }}
+            >
+              Total crimes overtime in{" "}
+              {isScot ? scotData.data![0].area_name : enData.data![0].lsoa_name}
+            </Text>
+            <Text style={{ ...styles.body, color: colors.secondaryText }}>
+              Scroll to see how crime trends are visualised in{" "}
+              {isScot ? scotData.data![0].area_name : enData.data![0].lsoa_name}
+              .
+            </Text>
+            <ScrollView
+              style={{
+                marginTop: 20,
+                backgroundColor: colors.secondaryBackground,
+                borderRadius: 15,
+                overflow: "scroll",
+              }}
+              horizontal
+            >
+              <LineChart
+                data={{
+                  labels: isScot
+                    ? scotData.allScots[0]!.ref_period.slice(
+                        13,
+                        scotData.allScots[0].length
+                      )
+                    : enData.data![0].crime_type,
+                  datasets: [
+                    isScot
+                      ? {
+                          data: scotData.allScots[0]!.total_crime.slice(
+                            13,
+                            scotData.allScots[0].length
+                          ),
+                          color: (opacity = 1) =>
+                            `rgba(134, 65, 244, ${opacity})`, // optional
+                          strokeWidth: 2, // optional
+                        }
+                      : {
+                          data: enData.data![0].n,
+                          color: (opacity = 1) =>
+                            `rgba(134, 65, 244, ${opacity})`, // optional
+                          strokeWidth: 2, // optional
+                        },
+                  ],
+                }}
+                style={{ marginLeft: -20 }}
+                width={screenWidth}
+                height={280}
+                chartConfig={chartConfig}
+                verticalLabelRotation={-70}
+                fromZero
+              />
+            </ScrollView>
+          </View>
+        )}
+        <View
+          style={{
+            borderTopColor: "#d3d3d3",
+            borderTopWidth: 2,
+            marginTop: 25,
+            width: "10%",
+            alignSelf: "center",
+          }}
+        />
         <Text
           style={{
             ...styles.subtitle,
             color: colors.text,
-            marginTop: 50,
+            marginTop: 25,
           }}
         >
           Most commonly committed crimes in{" "}
           {isScot ? scotData.data![0].area_name : enData.data![0].lsoa_name}
         </Text>
-        <View
+        <Text style={{ ...styles.body, color: colors.secondaryText }}>
+          Scroll to see more regularly committed crimes in{" "}
+          {isScot ? scotData.data![0].area_name : enData.data![0].lsoa_name}.
+        </Text>
+        <ScrollView
           style={{
             marginTop: 20,
             backgroundColor: colors.secondaryBackground,
             borderRadius: 15,
-            overflow: "hidden",
+            overflow: "scroll",
           }}
+          horizontal
         >
-          <LineChart
+          <BarChart
             data={{
               labels: isScot
                 ? scotData.data![0].crime_type
@@ -185,44 +270,63 @@ export default function StatsScreen() {
                     },
               ],
             }}
-            width={screenWidth - 30}
+            width={600}
             height={280}
+            showValuesOnTopOfBars={true}
+            yAxisSuffix={""}
+            yAxisLabel={""}
             chartConfig={chartConfig}
-            verticalLabelRotation={-60}
+            verticalLabelRotation={-70}
+            style={{ marginLeft: -20 }}
+            fromZero
           />
-        </View>
+        </ScrollView>
+        <View
+          style={{
+            borderTopColor: "#d3d3d3",
+            borderTopWidth: 2,
+            marginTop: 25,
+            width: "10%",
+            alignSelf: "center",
+          }}
+        />
         <Text
           style={{
             ...styles.subtitle,
             color: colors.text,
-            marginTop: 50,
+            marginTop: 25,
           }}
         >
           Total crimes surrounding{" "}
           {isScot ? scotData.data![0].area_name : enData.data![0].lsoa_name}
         </Text>
-        <View
+        <Text style={{ ...styles.body, color: colors.secondaryText }}>
+          Scroll to see total crimes neighbouring{" "}
+          {isScot ? scotData.data![0].area_name : enData.data![0].lsoa_name}.
+        </Text>
+        <ScrollView
           style={{
             marginTop: 10,
             backgroundColor: colors.secondaryBackground,
             borderRadius: 15,
             marginBottom: 60,
           }}
+          horizontal
         >
           <BarChart
             data={data}
-            width={screenWidth - 30}
+            width={screenWidth}
             height={280}
             chartConfig={chartConfig}
             showValuesOnTopOfBars={true}
             yLabelsOffset={20}
-            withHorizontalLabels={false}
             yAxisSuffix={""}
             yAxisLabel={""}
-            style={{ paddingRight: 10 }}
             verticalLabelRotation={-70}
+            style={{ marginLeft: -5 }}
+            fromZero
           />
-        </View>
+        </ScrollView>
       </ScrollView>
     </View>
   );
@@ -239,6 +343,11 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
+  },
+  body: {
+    fontSize: sizes.S14,
+    fontWeight: "400",
+    marginTop: 5,
   },
   heading: {
     fontSize: sizes.XL24,

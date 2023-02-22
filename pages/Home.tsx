@@ -262,7 +262,7 @@ const HomeScreen = memo(() => {
     }
   }, [enData, scotData.data]);
 
-  // console.log(enData, scotData);
+  console.log(enData, scotData);
 
   // Return loading screen if default or current location and address are not present or data cannot be fetched.
   if (!myLocation || !myAddress) return <Loading />;

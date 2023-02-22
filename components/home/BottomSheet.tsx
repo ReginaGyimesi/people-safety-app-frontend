@@ -125,7 +125,7 @@ export default function CustomBottomSheet({
           >
             Crime rate in
           </Text>
-          {(!message || !isLoading || data) && (
+          {!message && data && data.length > 0 && (
             <TouchableOpacity
               style={[styles.button]}
               onPress={() => navigation.dispatch(StackActions.push("Stats"))}
