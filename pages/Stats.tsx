@@ -28,10 +28,10 @@ export default function StatsScreen() {
   ]);
 
   const [labelsEn, setLabelsEn] = useState<any>([
-    enData ?? enData.data![0].lsoa_code,
+    enData && enData.data![0].lsoa_name,
   ]);
   const [valuesEn, setValuesEn] = useState<any>([
-    enData ?? enData.data![0].total_crime,
+    enData && enData.data![0].total_crime,
   ]);
 
   const isScot = React.useContext(ScotContext);
@@ -80,8 +80,7 @@ export default function StatsScreen() {
               .then((response) => response.json())
               .then((data) => {
                 if (data.length == 0) return;
-                if (data[0] == "No data found for post code") return;
-                setLabelsEn((l: any) => [...l, data[0]?.lsoa_code]);
+                setLabelsEn((l: any) => [...l, data[0]?.lsoa_name]);
                 setValuesEn((v: any) => [...v, data[0]?.total_crime]);
 
                 return data;
@@ -117,19 +116,12 @@ export default function StatsScreen() {
     },
   };
 
-  const data = {
-    labels: isScot ? labelsScot : labelsEn,
-    datasets: [
-      {
-        data: isScot ? valuesScot : valuesEn,
-      },
-    ],
-  };
-
   useEffect(() => {
     getData();
     dispatch(fetchAllScottishData({ la: scotData.data![0].area_name }));
   }, []);
+
+  console.log(valuesEn, labelsEn);
 
   if (
     valuesScot.length < 0 ||
@@ -156,7 +148,7 @@ export default function StatsScreen() {
             Stats
           </Text>
         </View>
-        {scotData.allScots && (
+        {scotData.allScots && isScot && (
           <View>
             <Text
               style={{
@@ -184,29 +176,19 @@ export default function StatsScreen() {
             >
               <LineChart
                 data={{
-                  labels: isScot
-                    ? scotData.allScots[0]!.ref_period.slice(
+                  labels: scotData.allScots[0]!.ref_period.slice(
+                    13,
+                    scotData.allScots[0].length
+                  ),
+                  datasets: [
+                    {
+                      data: scotData.allScots[0]!.total_crime.slice(
                         13,
                         scotData.allScots[0].length
-                      )
-                    : enData.data![0].crime_type,
-                  datasets: [
-                    isScot
-                      ? {
-                          data: scotData.allScots[0]!.total_crime.slice(
-                            13,
-                            scotData.allScots[0].length
-                          ),
-                          color: (opacity = 1) =>
-                            `rgba(134, 65, 244, ${opacity})`, // optional
-                          strokeWidth: 2, // optional
-                        }
-                      : {
-                          data: enData.data![0].n,
-                          color: (opacity = 1) =>
-                            `rgba(134, 65, 244, ${opacity})`, // optional
-                          strokeWidth: 2, // optional
-                        },
+                      ),
+                      color: (opacity = 1) => `rgba(134, 65, 244, ${opacity})`, // optional
+                      strokeWidth: 2, // optional
+                    },
                   ],
                 }}
                 style={{ marginLeft: -20 }}
@@ -314,7 +296,14 @@ export default function StatsScreen() {
           horizontal
         >
           <BarChart
-            data={data}
+            data={{
+              labels: isScot ? labelsScot : labelsEn,
+              datasets: [
+                {
+                  data: isScot ? valuesScot : valuesEn,
+                },
+              ],
+            }}
             width={screenWidth}
             height={280}
             chartConfig={chartConfig}

@@ -1,11 +1,12 @@
 import { API_BASE_URL } from "@env";
 import * as Location from "expo-location";
 import React, { Dispatch, memo, RefObject, useEffect, useState } from "react";
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, View, Text } from "react-native";
 import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 import { fetchScottishData } from "../../redux/slices/scotReducer";
 import { API_ENDPOINTS } from "../../routes/routes";
+import { sizes } from "../../styles";
 import { darkMap } from "../../styles/darkMap";
 import { useTheme } from "../../theme/ThemeProvider";
 import { schedulePushNotification } from "../../utils/notifs";
@@ -44,93 +45,93 @@ const Map = ({
   const dispatch = useAppDispatch();
 
   // Watch current location.
-  useEffect(() => {
-    async function getLocation() {
-      let { status } = await Location.requestForegroundPermissionsAsync();
+  // useEffect(() => {
+  //   async function getLocation() {
+  //     let { status } = await Location.requestForegroundPermissionsAsync();
 
-      if (status !== "granted") {
-        console.log("location not granted");
-      }
-      const loc = await Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.BestForNavigation,
-        timeInterval: 1,
-        distanceInterval: 1,
-      });
+  //     if (status !== "granted") {
+  //       console.log("location not granted");
+  //     }
+  //     const loc = await Location.getCurrentPositionAsync({
+  //       accuracy: Location.Accuracy.BestForNavigation,
+  //       timeInterval: 1,
+  //       distanceInterval: 1,
+  //     });
 
-      // Location longitude and latitude.
-      const { latitude, longitude } = loc.coords;
+  //     // Location longitude and latitude.
+  //     const { latitude, longitude } = loc.coords;
 
-      // Set coords.
-      coords = { latitude, longitude };
+  //     // Set coords.
+  //     coords = { latitude, longitude };
 
-      let response = await Location.reverseGeocodeAsync({
-        latitude,
-        longitude,
-      });
+  //     let response = await Location.reverseGeocodeAsync({
+  //       latitude,
+  //       longitude,
+  //     });
 
-      originalSubregion = response[0].subregion;
-      console.log("original subregion", originalSubregion);
-      setMyLocation(coords);
-    }
+  //     originalSubregion = response[0].subregion;
+  //     console.log("original subregion", originalSubregion);
+  //     setMyLocation(coords);
+  //   }
 
-    getLocation();
-  }, []);
+  //   getLocation();
+  // }, []);
 
-  useEffect(() => {
-    (async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
+  // useEffect(() => {
+  //   (async () => {
+  //     let { status } = await Location.requestForegroundPermissionsAsync();
 
-      if (status !== "granted") {
-        console.log("location not granted");
-      }
-      let interval = setInterval(async () => {
-        const loc = await Location.getCurrentPositionAsync({
-          accuracy: Location.Accuracy.BestForNavigation,
-          timeInterval: 1,
-          distanceInterval: 1,
-        });
+  //     if (status !== "granted") {
+  //       console.log("location not granted");
+  //     }
+  //     let interval = setInterval(async () => {
+  //       const loc = await Location.getCurrentPositionAsync({
+  //         accuracy: Location.Accuracy.BestForNavigation,
+  //         timeInterval: 1,
+  //         distanceInterval: 1,
+  //       });
 
-        // Location longitude and latitude.
-        const { latitude, longitude } = loc.coords;
+  //       // Location longitude and latitude.
+  //       const { latitude, longitude } = loc.coords;
 
-        // Set coords.
-        coords = { latitude, longitude };
+  //       // Set coords.
+  //       coords = { latitude, longitude };
 
-        let response = await Location.reverseGeocodeAsync({
-          latitude,
-          longitude,
-        });
+  //       let response = await Location.reverseGeocodeAsync({
+  //         latitude,
+  //         longitude,
+  //       });
 
-        nextSubregion = response[0].subregion;
+  //       nextSubregion = response[0].subregion;
 
-        console.log("region", originalSubregion);
+  //       console.log("region", originalSubregion);
 
-        // If next region does not equal starting point.
-        if (nextSubregion != originalSubregion) {
-          originalSubregion = nextSubregion;
+  //       // If next region does not equal starting point.
+  //       if (nextSubregion != originalSubregion) {
+  //         originalSubregion = nextSubregion;
 
-          if (response[0].subregion == "Glasgow")
-            response[0].subregion = "Glasgow City";
+  //         if (response[0].subregion == "Glasgow")
+  //           response[0].subregion = "Glasgow City";
 
-          dispatch(fetchScottishData({ la: nextSubregion }));
+  //         dispatch(fetchScottishData({ la: nextSubregion }));
 
-          setMyLocation(coords);
-          setMyAddress(response[0]);
-          // schedulePushNotification({
-          //   title:
-          //     (!response[0]?.street ? "" : `${response[0]?.street}, `) +
-          //     `${response[0]?.postalCode}, ${response[0]?.city}, ${response[0]?.country}`,
-          //   body: `You've entered ${scotData.data![0]?.score} out of 10 or ${
-          //     scotData.data![0]?.score_category
-          //   } danger area.`,
-          // });
-        }
-      }, 10000);
-      return () => {
-        clearInterval(interval);
-      };
-    })();
-  }, []);
+  //         setMyLocation(coords);
+  //         setMyAddress(response[0]);
+  //         // schedulePushNotification({
+  //         //   title:
+  //         //     (!response[0]?.street ? "" : `${response[0]?.street}, `) +
+  //         //     `${response[0]?.postalCode}, ${response[0]?.city}, ${response[0]?.country}`,
+  //         //   body: `You've entered ${scotData.data![0]?.score} out of 10 or ${
+  //         //     scotData.data![0]?.score_category
+  //         //   } danger area.`,
+  //         // });
+  //       }
+  //     }, 10000);
+  //     return () => {
+  //       clearInterval(interval);
+  //     };
+  //   })();
+  // }, []);
 
   return (
     <View style={styles.container}>
@@ -145,8 +146,6 @@ const Map = ({
           latitudeDelta: 0.0421,
           longitudeDelta: 0.0421,
         }}
-        showsUserLocation={true}
-        followsUserLocation={true}
         customMapStyle={isDark ? darkMap : []}
         provider={PROVIDER_GOOGLE}
       >

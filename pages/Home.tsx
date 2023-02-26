@@ -125,6 +125,7 @@ const HomeScreen = memo(() => {
     if (localAuth == "Highland") localAuth = "Highland Council";
     if (localAuth == "West Dunbartonshire")
       localAuth = "West Dunbartonshire Council";
+
     if (country == "Scotland") {
       setScot(true);
       dispatch(fetchScottishData({ la: localAuth }));
@@ -141,9 +142,8 @@ const HomeScreen = memo(() => {
       dispatch(fetchNeighbouringScot({ la: localAuth }));
     } else if (country == "England") {
       setScot(false);
-
       dispatch(fetchEnglishData({ po: sanitisedPo }));
-      dispatch(fetchNeighbouringEn({ po: enData.data[0].lsoa_code }));
+      dispatch(fetchNeighbouringEn({ po: sanitisedPo }));
     } else {
       setMessage(
         "Sorry, no data available outside of England and Scotland 😔 We're working on it!"
@@ -244,25 +244,27 @@ const HomeScreen = memo(() => {
     })();
   }, []);
 
+  console.log(message);
   useEffect(() => {
     const msg = "Oops, nothing to see here. 👀 We're working on it!";
-    if (!scotData.data || !enData.data) return;
     if (
+      enData.data &&
       enData.data[0] == "No data found for post code." &&
       !isScot &&
       !enData.loading
     ) {
       setMessage(msg);
     } else if (
+      scotData.data &&
       scotData.data[0] == "No data found for local authority." &&
       isScot &&
       !scotData.loading
     ) {
-      setMessage(msg);
+      setMessage(null);
     }
-  }, [enData, scotData.data]);
+  }, [enData.data, scotData.data]);
 
-  console.log(enData, scotData);
+  console.log(enData, isScot);
 
   // Return loading screen if default or current location and address are not present or data cannot be fetched.
   if (!myLocation || !myAddress) return <Loading />;

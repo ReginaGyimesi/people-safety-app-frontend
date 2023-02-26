@@ -249,7 +249,7 @@ export default function CustomBottomSheet({
                         <Text style={[styles.subtitle, { color: colors.text }]}>
                           Most common crime types
                         </Text>
-                        {!message && data && data.length > 0 && (
+                        {/* {!message && data && data.length > 0 && (
                           <TouchableOpacity
                             style={[styles.button]}
                             onPress={() =>
@@ -265,7 +265,7 @@ export default function CustomBottomSheet({
                               See more
                             </Text>
                           </TouchableOpacity>
-                        )}
+                        )} */}
                       </View>
                       <View
                         style={{
@@ -400,9 +400,9 @@ const styles = StyleSheet.create({
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
-      height: 2,
+      height: 1,
     },
-    shadowOpacity: 0.34,
+    shadowOpacity: 0.3,
     shadowRadius: 6.27,
     marginLeft: 10,
     zIndex: 99,

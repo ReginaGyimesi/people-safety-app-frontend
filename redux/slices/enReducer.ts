@@ -40,7 +40,7 @@ export const fetchNeighbouringEn = createAsyncThunk(
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          code: po,
+          po: po,
         }),
       });
 
