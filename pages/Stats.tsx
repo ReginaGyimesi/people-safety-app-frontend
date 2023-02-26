@@ -21,17 +21,17 @@ export default function StatsScreen() {
   const scotData = useAppSelector((s) => s.scotData);
   const enData = useAppSelector((s) => s.enData);
   const [labelsScot, setLabelsScot] = useState<any>([
-    scotData && scotData.data![0].area_name,
+    scotData && scotData.data && scotData.data![0].area_name,
   ]);
   const [valuesScot, setValuesScot] = useState<any>([
-    scotData && scotData.data![0].total_crime,
+    scotData && scotData.data && scotData.data![0].total_crime,
   ]);
 
   const [labelsEn, setLabelsEn] = useState<any>([
-    enData && enData.data![0].lsoa_name,
+    enData && enData.data && enData.data![0].lsoa_name,
   ]);
   const [valuesEn, setValuesEn] = useState<any>([
-    enData && enData.data![0].total_crime,
+    enData && enData.data && enData.data![0].total_crime,
   ]);
 
   const isScot = React.useContext(ScotContext);

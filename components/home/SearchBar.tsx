@@ -22,7 +22,7 @@ export default function SearchBar({ searchLocation }: Props) {
     <View style={styles.container}>
       <View style={styles.input}>
         <GooglePlacesAutocomplete
-          placeholder="Search places and postcodes..."
+          placeholder="Start typing area names, streets..."
           textInputProps={{
             placeholderTextColor: colors.placeholder,
           }}
