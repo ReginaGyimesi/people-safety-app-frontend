@@ -14,10 +14,15 @@
     "updates": {
       "fallbackToCacheTimeout": 0
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "infoPlist": {
-        "UIBackgroundModes": ["location", "fetch"]
+        "UIBackgroundModes": [
+          "location",
+          "fetch"
+        ]
       },
       "bundleIdentifier": "people-safety-app"
     },
@@ -34,7 +39,7 @@
     },
     "extra": {
       "eas": {
-        "projectId": "a9dc7db2-b811-4243-977e-3f7e67c468b9"
+        "projectId": "0b67e245-39cc-4a08-81ce-d6fb7efdc5d5"
       }
     }
   }
