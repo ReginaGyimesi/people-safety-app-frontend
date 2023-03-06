@@ -14,10 +14,7 @@ export default function App() {
   return (
     <Provider store={store}>
       <ThemeProvider>
-        <GestureHandlerRootView
-          style={{ flex: 1 }}
-          accessibilityLabel="app-root"
-        >
+        <GestureHandlerRootView style={{ flex: 1 }}>
           <ScotProvider>
             <NavigationContainer>
               <Stack.Navigator
