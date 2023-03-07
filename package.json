@@ -24,7 +24,7 @@
     "expo-device": "~4.3.0",
     "expo-font": "~10.2.0",
     "expo-location": "~14.3.0",
-    "expo-modules-core": "^1.2.4",
+    "expo-modules-core": "0.11.10",
     "expo-notifications": "~0.16.1",
     "expo-splash-screen": "~0.16.2",
     "expo-status-bar": "~1.4.0",
