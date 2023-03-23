@@ -125,10 +125,14 @@ const HomeScreen = memo(() => {
     if (localAuth == "Highland") localAuth = "Highland Council";
     if (localAuth == "West Dunbartonshire")
       localAuth = "West Dunbartonshire Council";
+    if (localAuth == "East Renfrewshire Council")
+      localAuth = "East Renfrewshire";
+    if (localAuth == "Angus Council") localAuth = "Angus";
+    if (localAuth == "Argyll and Bute Council") localAuth = "Argyll and Bute";
 
     if (country == "Scotland") {
       setScot(true);
-      dispatch(fetchScottishData({ la: localAuth }));
+      dispatch(fetchScottishData({ la: localAuth ?? "not found" }));
 
       if (localAuth == "East Renfrewshire Council")
         localAuth = "East Renfrewshire";
@@ -254,17 +258,12 @@ const HomeScreen = memo(() => {
       !enData.loading
     ) {
       setMessage(msg);
-    } else if (
-      scotData.data &&
-      scotData.data[0] == "No data found for local authority." &&
-      isScot &&
-      !scotData.loading
-    ) {
-      setMessage(null);
+    } else if (scotData.data.length == 0 && isScot && !scotData.loading) {
+      setMessage(msg);
     }
   }, [enData.data, scotData.data]);
 
-  console.log(enData, isScot);
+  console.log(enData, scotData.data.length == 0 && isScot && !scotData.loading);
 
   // Return loading screen if default or current location and address are not present or data cannot be fetched.
   if (!myLocation || !myAddress) return <Loading />;

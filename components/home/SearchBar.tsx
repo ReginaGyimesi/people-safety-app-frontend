@@ -17,6 +17,7 @@ type Props = {
  */
 export default function SearchBar({ searchLocation }: Props) {
   const { colors } = useTheme();
+  const key = API_GOOGLE_KEY;
 
   return (
     <View style={styles.container}>
@@ -38,7 +39,7 @@ export default function SearchBar({ searchLocation }: Props) {
             });
           }}
           query={{
-            key: API_GOOGLE_KEY,
+            key: key,
             components: "country:uk",
             language: "en",
           }}
