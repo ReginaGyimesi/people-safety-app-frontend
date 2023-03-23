@@ -4,7 +4,7 @@ Made with:
 
 - React Native
 - Expo Go
-- Typescript
+- TypeScript
 
 ## Run locally
 
