@@ -2,9 +2,11 @@
 <img src="assets/cover.png" width="100%" />
 </p>
 
+## People Safety App (Scotland and England)
+
 This mobile application was developed as part of my Computer Science degree project at the University of Strathclyde. The app summarises crime data into a single concise system using the Scottish and English open governmental datasets. It enables users to search between areas and their neighbours to view crime statistics.
 
-Made with:
+## Made with
 
 - React Native
 - Expo Go
