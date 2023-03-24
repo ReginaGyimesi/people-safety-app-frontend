@@ -9,5 +9,5 @@ Made with:
 ## Run locally
 
 ```bash
-npm install && expo start
+npm install && npx expo start
 ```
