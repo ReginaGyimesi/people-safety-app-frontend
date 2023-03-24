@@ -134,7 +134,7 @@ const Map = ({
   // }, []);
 
   return (
-    <View style={styles.container}>
+    <View style={styles.container} testID="map">
       {/* <Notification /> */}
       <MapView
         style={styles.map}
@@ -147,7 +147,7 @@ const Map = ({
           longitudeDelta: 0.0421,
         }}
         customMapStyle={isDark ? darkMap : []}
-        provider={PROVIDER_GOOGLE}
+        //provider={PROVIDER_GOOGLE}
       >
         <Marker
           coordinate={{

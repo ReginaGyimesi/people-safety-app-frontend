@@ -28,7 +28,7 @@ export default function DarkModeButton() {
         bottom: "41%",
       }}
       onPress={changeTheme}
-      accessibilityLabel="dark-mode-button"
+      testID="dark-mode-button"
     >
       {isDark ? (
         <IonIcons name={"sunny-outline"} color={baseColors.primary} size={26} />

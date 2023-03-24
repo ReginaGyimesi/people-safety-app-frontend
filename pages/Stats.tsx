@@ -137,6 +137,7 @@ export default function StatsScreen() {
       <GoBackButton />
       <ScrollView
         style={{ ...styles.container, backgroundColor: colors.background }}
+        testID="stats-screen"
       >
         <View style={{ ...styles.flex }}>
           <Text
@@ -173,6 +174,7 @@ export default function StatsScreen() {
                 overflow: "scroll",
               }}
               horizontal
+              testID="crimes-over-time"
             >
               <LineChart
                 data={{
@@ -209,6 +211,7 @@ export default function StatsScreen() {
             width: "10%",
             alignSelf: "center",
           }}
+
         />
         <Text
           style={{
@@ -232,6 +235,7 @@ export default function StatsScreen() {
             overflow: "scroll",
           }}
           horizontal
+          testID="stats-most-common"
         >
           <BarChart
             data={{
@@ -294,6 +298,7 @@ export default function StatsScreen() {
             marginBottom: 60,
           }}
           horizontal
+          testID="stats-neighbours"
         >
           <BarChart
             data={{

@@ -108,6 +108,7 @@ export default function CustomBottomSheet({
           borderBottomLeftRadius: 23,
           paddingBottom: 20,
         }}
+        testID="bottom-sheet-header"
       >
         <View
           style={{
@@ -128,7 +129,7 @@ export default function CustomBottomSheet({
         </View>
         <Text style={{ ...styles.text, maxWidth: 280 }}>{address}</Text>
       </View>
-      <BottomSheetScrollView>
+      <BottomSheetScrollView testID="bottom-sheet">
         {message && (
           <Text
             style={[
@@ -207,6 +208,7 @@ export default function CustomBottomSheet({
                           onPress={() =>
                             navigation.dispatch(StackActions.push("Stats"))
                           }
+                          testID="see-more"
                         >
                           <Text
                             style={{
@@ -272,6 +274,7 @@ export default function CustomBottomSheet({
                           flexDirection: "row",
                           justifyContent: "space-between",
                         }}
+                        testID="most-common-crimes"
                       >
                         <View>
                           {data[0]?.crime_type
@@ -312,6 +315,7 @@ export default function CustomBottomSheet({
                         backgroundColor: colors.background,
                         borderBottomLeftRadius: 0,
                       }}
+                      testID="neighbouring-areas"
                     >
                       <Text style={[styles.subtitle, { color: colors.text }]}>
                         Neighbouring areas
@@ -330,6 +334,7 @@ export default function CustomBottomSheet({
                               },
                             ]}
                             onPress={() => onNeighbourClick(i)}
+                            testID="neighbour-click"
                           >
                             {n}
                           </Text>

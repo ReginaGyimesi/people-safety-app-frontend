@@ -23,6 +23,7 @@ export default function CurrentLocationButton({ onPress }: Props) {
         backgroundColor: colors.background,
       }}
       onPress={onPress}
+      testID="current-location-button"
     >
       <MaterialIcons
         name={"my-location"}

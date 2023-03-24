@@ -8,6 +8,7 @@ export default function GoBackButton() {
     <TouchableOpacity
       style={[styles.button]}
       onPress={() => navigation.goBack()}
+      testID="go-back-button"
     >
       <Text style={{ color: baseColors.white }}>Back</Text>
     </TouchableOpacity>

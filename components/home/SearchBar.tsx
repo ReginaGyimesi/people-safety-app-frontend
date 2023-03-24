@@ -17,11 +17,10 @@ type Props = {
  */
 export default function SearchBar({ searchLocation }: Props) {
   const { colors } = useTheme();
-  const key = API_GOOGLE_KEY;
 
   return (
     <View style={styles.container}>
-      <View style={styles.input}>
+      <View style={styles.input}  testID="google-places">
         <GooglePlacesAutocomplete
           placeholder="Start typing area names, streets..."
           textInputProps={{
@@ -39,7 +38,7 @@ export default function SearchBar({ searchLocation }: Props) {
             });
           }}
           query={{
-            key: key,
+            key: "AIzaSyD_NNnU0vELMpfIHdEeK4F2ZpQavY8rjPo",
             components: "country:uk",
             language: "en",
           }}
