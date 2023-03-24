@@ -1,5 +1,3 @@
-# People's Safety App
-
 <p>
 <img src="assets/cover.png" width="100%" border-radius="10px" />
 </p>
