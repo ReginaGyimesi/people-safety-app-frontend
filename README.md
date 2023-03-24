@@ -1,6 +1,10 @@
 # People's Safety App
 
-This mobile application was developed as part of my Computer Science degree project at the University of Strathclyde. The app summarises crime data into a single concise system using the Scottish and English open governmental datasets. It enables users to search between areas and their neighbours.
+<p>
+<img src="assets/glasgow.cover.png" width="100%" />
+</p>
+
+This mobile application was developed as part of my Computer Science degree project at the University of Strathclyde. The app summarises crime data into a single concise system using the Scottish and English open governmental datasets. It enables users to search between areas and their neighbours to view crime statistics.
 
 Made with:
 
